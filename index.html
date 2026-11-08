@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>南洋漫游记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --paper:#f3efe2; --card:#fbf8ee; --ink:#2c3a33; --muted:#6b776b;
+  --jade:#4f8571; --deep:#36604f; --sage:#9dbba7; --mint:#dbe8dc;
+  --pink:#d99c94; --pink-l:#f3dfd9; --terra:#c07e62; --ochre:#cfa556; --ochre-l:#f1e5c4;
+  --turq:#6fa8a2; --turq-l:#d8ebe8; --rose:#9c5557; --rose-l:#f4e2df;
+  --hand:"ZCOOL KuaiLe","Kaiti SC","STKaiti","KaiTi","PingFang SC","Microsoft YaHei",sans-serif;
+  --body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --num:"Caveat","Comic Sans MS",cursive;
+  --tile:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23e5ead9'/><rect x='3' y='3' width='58' height='58' rx='7' fill='none' stroke='%234f8571' stroke-width='1.4'/><g fill='%239dbba7' stroke='%234f8571' stroke-width='.8'><ellipse cx='32' cy='16' rx='6' ry='10'/><ellipse cx='32' cy='48' rx='6' ry='10'/><ellipse cx='16' cy='32' rx='10' ry='6'/><ellipse cx='48' cy='32' rx='10' ry='6'/></g><g fill='%23d99c94'><ellipse cx='32' cy='18' rx='2.6' ry='5'/><ellipse cx='32' cy='46' rx='2.6' ry='5'/><ellipse cx='18' cy='32' rx='5' ry='2.6'/><ellipse cx='46' cy='32' rx='5' ry='2.6'/></g><circle cx='32' cy='32' r='4.5' fill='%23cfa556' stroke='%234f8571' stroke-width='.8'/><g fill='%236fa8a2'><path d='M0 0h13L0 13z'/><path d='M64 0H51l13 13z'/><path d='M0 64h13L0 51z'/><path d='M64 64H51l13-13z'/></g></svg>");
+  --tilestrip:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><rect width='28' height='14' fill='%23e5ead9'/><path d='M7 1l6 6-6 6-6-6z' fill='%239dbba7' stroke='%234f8571' stroke-width='.8'/><path d='M21 1l6 6-6 6-6-6z' fill='%23d99c94' stroke='%234f8571' stroke-width='.8'/><circle cx='7' cy='7' r='1.6' fill='%23cfa556'/><circle cx='21' cy='7' r='1.6' fill='%23cfa556'/></svg>");
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .07 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+}
+.wrap{max-width:540px;margin:0 auto;padding-bottom:100px}
+a{color:inherit}
+.svgdefs{position:absolute;width:0;height:0;overflow:hidden}
+
+/* 手绘描边：真实边框被替换成带抖动滤镜的伪元素 */
+.rough{position:relative;isolation:isolate;border:0 !important;background:transparent !important}
+.rough::before{content:"";position:absolute;inset:0;border:2px solid var(--ink);border-radius:var(--r,16px);background-color:var(--bg,var(--card));background-image:var(--bgimg,none);filter:url(#rough);pointer-events:none;z-index:-1}
+.rough::after{content:"";position:absolute;inset:0;border-radius:var(--r,16px);background:var(--sh,rgba(44,58,51,.14));transform:translate(4px,5px);filter:url(#rough);pointer-events:none;z-index:-2}
+
+/* 顶部 */
+.top{position:relative;padding:20px 16px 0;overflow:hidden}
+.top::before{content:"";position:absolute;inset:0;background-image:var(--tile);background-size:56px;opacity:.75}
+.title-card{--bg:rgba(251,248,238,.96);padding:16px 16px 12px;--r:18px;--sh:var(--jade)}
+.title-card h1{margin:0;font-family:var(--hand);font-weight:400;font-size:31px;letter-spacing:2px;line-height:1.15}
+.title-card h1 span{color:var(--terra)}
+.sub{margin:3px 0 10px;color:var(--muted);font-size:13px}
+.flower{position:absolute;width:46px;height:46px;z-index:3}
+.flower.f1{right:12px;top:10px;transform:rotate(12deg)}
+.flower.f2{right:52px;top:30px;width:30px;height:30px;transform:rotate(-20deg)}
+.clocks{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px;position:relative;z-index:3}
+.clock{text-align:center;padding:5px 2px;background:#fff;border:1.5px dashed var(--ink);border-radius:12px}
+.clock b{display:block;font-family:var(--num);font-size:23px;line-height:1.1}
+.clock small{font-size:11px;color:var(--muted)}
+.clock.local{background:var(--mint);border:2px solid var(--deep)}
+.clock.local b{font-size:30px;color:var(--deep)}
+.clock.local small:first-child{color:var(--deep);font-weight:600}
+.countdown{margin-top:8px;font-size:13px;text-align:center;color:var(--deep);position:relative;z-index:3}
+.shophouses{position:relative;display:block;width:100%;height:96px;margin-top:14px}
+.five-foot{position:relative;height:14px;background-image:var(--tilestrip);background-size:28px 14px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+
+/* 日期条 */
+.days{display:flex;gap:10px;overflow-x:auto;padding:16px 16px 10px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;width:64px;text-align:center;padding:7px 4px 8px;cursor:pointer;font-family:inherit;color:inherit;--r:12px;
+  --bgimg:linear-gradient(135deg,var(--sage) 9px,transparent 9px),linear-gradient(225deg,var(--sage) 9px,transparent 9px),linear-gradient(45deg,var(--sage) 9px,transparent 9px),linear-gradient(315deg,var(--sage) 9px,transparent 9px)}
+.chip .d{font-family:var(--num);font-size:24px;line-height:1}
+.chip .w{font-size:12px;color:var(--muted)}
+.chip .c{display:inline-block;margin-top:3px;font-size:11px;padding:0 7px;border-radius:9px;color:#fff;background:var(--jade)}
+.chip .c.bkk{background:var(--terra)}
+.chip .c.sz{background:var(--ochre)}
+.chip.on{--bg:var(--mint);transform:translateY(-3px) rotate(-1.5deg);--sh:var(--ink)}
+.chip.today .w::after{content:" · 今天";color:var(--rose);font-weight:600}
+
+/* 卡片 */
+main{padding:2px 16px}
+.tab{display:none}
+.tab.active{display:block}
+.card{--bg:var(--card);padding:15px 15px 13px;margin:16px 0}
+.card h3{margin:0 0 10px;font-family:var(--hand);font-weight:400;font-size:20px;display:flex;align-items:center;gap:7px;color:var(--deep)}
+.card h3 .ic{width:24px;height:24px;flex:0 0 auto;color:var(--jade)}
+.card h3 .tag{margin-left:auto;font-family:var(--body);font-size:11px;color:var(--muted)}
+.dayhead{margin:6px 0 0;padding:4px 2px;display:flex;align-items:flex-end;gap:10px}
+.dayhead .t{font-family:var(--hand);font-size:27px;line-height:1.2}
+.dayhead .m{color:var(--muted);font-size:13px}
+.dayhead .no{font-family:var(--num);font-size:46px;line-height:.9;color:var(--terra)}
+.hint{font-size:12px;color:var(--muted)}
+.empty{color:var(--muted);font-size:13px;padding:6px 0}
+.ic{display:inline-block;vertical-align:-4px}
+.ribbon{display:inline-block;font-family:var(--hand);font-size:13px;padding:1px 10px;background:var(--ochre-l);border:1.5px solid var(--ink);border-radius:10px;transform:rotate(-2deg)}
+
+/* 天气 */
+.wx{display:flex;align-items:center;gap:14px}
+.wx .ico{font-size:44px;line-height:1}
+.wx .tmp{font-family:var(--num);font-size:44px;line-height:1}
+.wx .desc{font-size:13px;color:var(--muted)}
+.wx-day{margin-top:9px;padding:7px 10px;border-radius:10px;background:var(--mint);font-size:13px}
+.wx-more{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{font-size:12px;padding:2px 9px;border-radius:12px;background:#fff;border:1.5px solid var(--ink)}
+.pill.warn{background:var(--ochre-l)}
+
+/* 地图 */
+#map{height:250px;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:#e4e6d6}
+#map .leaflet-tile-pane{filter:sepia(.4) saturate(.85) hue-rotate(28deg) brightness(1.03)}
+.pin{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--terra);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+.pin span{transform:rotate(45deg);color:#fff;font-family:var(--num);font-size:17px;font-weight:700}
+.pin.fixed{background:var(--jade)}
+.mapfail{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+
+/* 行程 */
+.tl{list-style:none;margin:0;padding:0;position:relative}
+.tl::before{content:"";position:absolute;left:15px;top:8px;bottom:8px;border-left:2px dashed var(--sage)}
+.tl li{position:relative;padding:0 0 16px 42px}
+.tl .no{position:absolute;left:2px;top:0;width:28px;height:28px;border-radius:50%;background:var(--terra);color:#fff;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:18px;font-weight:700}
+.tl .no.fixed{background:var(--jade)}
+.tl .no.none{background:var(--card);color:var(--ink)}
+.tl .time{font-family:var(--num);font-size:21px;color:var(--turq);margin-right:6px}
+.tl .name{font-weight:600}
+.badge{display:inline-block;font-size:10px;padding:0 6px;border-radius:8px;margin-left:6px;vertical-align:2px}
+.badge.idea{background:var(--ochre-l);color:#7d5d18;border:1px solid var(--ochre)}
+.badge.fixed{background:var(--mint);color:var(--deep);border:1px solid var(--jade)}
+.tl .d{font-size:13px;color:var(--muted);margin:2px 0 4px}
+.tl .go,.tl .tip{font-size:12.5px;margin:2px 0;display:flex;gap:5px;align-items:flex-start}
+.tl .go{color:var(--deep)}
+.tl .tip{color:#7d5d18}
+.lore{margin:6px 0 2px}
+.lore summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--deep);list-style:none;display:inline-block;padding:3px 10px;border:1.5px solid var(--ink);border-radius:999px;background:var(--mint)}
+.lore summary::-webkit-details-marker{display:none}
+.lore[open] summary{background:var(--ochre-l)}
+.lore p{margin:7px 0 0;padding:9px 11px;font-size:13px;line-height:1.75;border:1.5px dashed var(--ink);border-radius:12px;background:var(--card)}
+.svgmap{width:100%;height:auto;display:block;background:#e9ecd9}
+.svgmap text{font-family:var(--body);font-size:10.5px;fill:var(--ink);paint-order:stroke;stroke:#fbf8ee;stroke-width:3px;stroke-linejoin:round}
+.svgmap .num{font-family:var(--num);font-size:15px;font-weight:700;fill:#fff;stroke:none}
+.mapnote{padding:6px 10px 2px;font-size:11.5px;color:var(--muted);text-align:center}
+.tl .go .ic,.tl .tip .ic{width:16px;height:16px;flex:0 0 auto;margin-top:2px}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.btn{font-size:12px;text-decoration:none;padding:3px 10px;border:1.5px solid var(--ink);border-radius:14px;background:#fff;white-space:nowrap;cursor:pointer;font-family:inherit;color:var(--ink)}
+.btn.g{background:var(--turq-l)}
+.btn.a{background:var(--mint)}
+.btn.x{background:var(--rose-l);color:var(--rose);border-color:var(--rose)}
+.btn.solid{background:var(--deep);color:#fff;border-color:var(--deep)}
+.btn[disabled]{opacity:.45;cursor:default}
+
+/* 清单 / 待办 */
+.todo{list-style:none;margin:0;padding:0}
+.todo li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px dashed rgba(44,58,51,.25)}
+.todo li:last-child{border-bottom:0}
+.todo input[type=checkbox]{width:19px;height:19px;margin-top:2px;accent-color:var(--jade);flex:0 0 auto}
+.todo .txt{flex:1;font-size:14px}
+.todo .txt small{display:block;color:var(--muted);font-size:12px}
+.todo li.done .txt{text-decoration:line-through;color:var(--muted)}
+.todo .del{border:0;background:none;color:var(--muted);font-size:17px;cursor:pointer;padding:0 4px}
+.addrow{display:flex;gap:6px;margin-top:9px}
+.addrow input,.addrow select,.form input,.form select{min-width:0;padding:8px 10px;border:1.5px solid var(--ink);border-radius:12px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+.addrow input{flex:1}
+.addrow button,.form button{padding:8px 13px;border:1.5px solid var(--ink);border-radius:12px;background:var(--jade);color:#fff;font-family:inherit;font-size:14px;cursor:pointer}
+.progress{height:12px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;overflow:hidden;margin:4px 0 2px}
+.progress i{display:block;height:100%;background-image:var(--tilestrip);background-size:24px 12px;transition:width .3s}
+.group-title{font-family:var(--hand);font-size:17px;color:var(--terra);margin:12px 0 2px}
+.remind{padding:10px 12px;background:var(--ochre-l);border-radius:12px;font-size:13.5px;margin:4px 0}
+.remind b{color:#7d5d18}
+
+/* 新闻 */
+.news{list-style:none;margin:0;padding:0}
+.news li{padding:7px 0;border-bottom:1px dashed rgba(44,58,51,.25);font-size:13.5px}
+.news li:last-child{border-bottom:0}
+.news a{text-decoration:none}
+.news .meta{font-size:11px;color:var(--muted)}
+.alert{display:inline-block;background:var(--rose);color:#fff;font-size:10px;padding:0 5px;border-radius:6px;margin-right:4px}
+.sos{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}
+.sos a{text-decoration:none;font-size:12px;padding:3px 10px;border-radius:12px;background:var(--rose-l);border:1.5px solid var(--rose);color:var(--rose)}
+.srcs{display:flex;flex-wrap:wrap;gap:6px}
+
+.notes-btn{display:block;text-align:center;text-decoration:none;font-family:var(--hand);font-size:19px;padding:13px;margin:18px 0;--bg:var(--mint);--sh:var(--ink)}
+.notes-btn small{display:block;font-family:var(--body);font-size:11px;color:var(--muted)}
+
+/* 美食 / 购物 */
+.cityline{margin:16px 0 2px;font-family:var(--hand);font-size:25px;display:flex;align-items:center;gap:8px}
+.cityline .ic{width:28px;height:28px;color:var(--terra)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.fchip{padding:4px 12px;border:1.5px solid var(--ink);border-radius:14px;background:#fff;font-size:13px;cursor:pointer;font-family:inherit;color:var(--ink)}
+.fchip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.place{padding:11px 0;border-bottom:1.5px dashed rgba(44,58,51,.28)}
+.place:last-child{border-bottom:0}
+.place .top2{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.place .nm{font-weight:600;font-size:15px}
+.place .dist{margin-left:auto;font-family:var(--num);font-size:18px;color:var(--turq)}
+.place .ds{font-size:13px;color:var(--muted);margin:2px 0 2px}
+.cat{font-size:10px;padding:0 7px;border-radius:8px;border:1px solid var(--ink)}
+.cat.food{background:var(--pink-l)} .cat.coffee{background:#e7dccb} .cat.drink{background:var(--turq-l)} .cat.dessert{background:var(--ochre-l)}
+.where{font-size:12px;color:var(--deep)}
+
+/* 锦囊 */
+.fx{display:grid;grid-template-columns:1fr auto 1.1fr;gap:8px;align-items:center}
+.fx input,.fx select{width:100%;min-width:0;padding:8px 10px;border:1.5px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink)}
+.fx input{font-family:var(--num);font-size:24px}
+.fx select{font-family:var(--body);font-size:14px}
+.fx .eq{font-family:var(--num);font-size:26px;color:var(--muted)}
+.fxout{margin-top:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.fxout div{text-align:center;padding:6px 2px;border:1.5px dashed var(--ink);border-radius:10px;background:#fff}
+.fxout b{display:block;font-family:var(--num);font-size:24px;line-height:1.1;color:var(--deep)}
+.fxout small{font-size:11px;color:var(--muted)}
+.tips{list-style:none;margin:0;padding:0}
+.tips li{padding:7px 0 7px 22px;position:relative;font-size:14px;border-bottom:1px dashed rgba(44,58,51,.22)}
+.tips li:last-child{border-bottom:0}
+.tips li::before{content:"✿";position:absolute;left:1px;top:6px;color:var(--pink);font-size:14px}
+.tips b{color:var(--deep)}
+.phr{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.phr .zh{color:var(--muted)}
+.phr .say{font-weight:600}
+.phr .say small{display:block;font-weight:400;font-size:12px;color:var(--turq)}
+
+/* 钱包 */
+.ticket{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;padding:10px 12px;margin:8px 0;background:#fff;border:1.5px solid var(--ink);border-radius:12px;position:relative}
+.ticket::before,.ticket::after{content:"";position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--card);border:1.5px solid var(--ink)}
+.ticket::before{left:-8px;clip-path:inset(0 0 0 50%)} .ticket::after{right:-8px;clip-path:inset(0 50% 0 0)}
+.ticket .city{font-family:var(--hand);font-size:19px}
+.ticket .city small{display:block;font-family:var(--body);font-size:11px;color:var(--muted)}
+.ticket .mid{text-align:center;font-size:11px;color:var(--muted)}
+.ticket .mid .ic{width:26px;height:26px;color:var(--terra)}
+.ticket .r{text-align:right}
+.ticket .tt{display:block;font-family:var(--num);font-size:28px;line-height:1;color:var(--deep);margin-top:2px}
+.ticket .fno{font-family:var(--num);font-size:19px;color:var(--terra);font-weight:700}
+.tl .ticket{margin:6px 0 2px}
+.tl .no.flt{background:var(--ochre)}
+.tl .no.flt .ic{width:16px;height:16px;color:#fff}
+.ticket .meta{grid-column:1/-1;border-top:1.5px dashed rgba(44,58,51,.3);padding-top:6px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.hotel{padding:10px 0;border-bottom:1.5px dashed rgba(44,58,51,.28)}
+.hotel:last-child{border-bottom:0}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.form .full{grid-column:1/-1}
+.ledger{list-style:none;margin:10px 0 0;padding:0}
+.ledger li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed rgba(44,58,51,.25);font-size:13.5px}
+.ledger .amt{margin-left:auto;font-family:var(--num);font-size:19px;color:var(--deep);white-space:nowrap}
+.ledger small{color:var(--muted)}
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.sumgrid div{background:#fff;border:1.5px dashed var(--ink);border-radius:10px;padding:6px;text-align:center}
+.sumgrid b{display:block;font-family:var(--num);font-size:24px;color:var(--deep);line-height:1.1}
+.sumgrid small{font-size:11px;color:var(--muted)}
+.settle{font-size:13.5px;padding:4px 0}
+
+/* 给司机看 */
+.overlay{position:fixed;inset:0;z-index:2000;background:var(--card);display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;background-image:var(--tile);background-size:72px}
+.overlay.show{display:flex}
+.overlay .box{--bg:var(--card);padding:26px 20px;max-width:520px;width:100%;--r:20px}
+.overlay .lbl{font-size:14px;color:var(--muted)}
+.overlay .big{font-size:30px;font-weight:700;line-height:1.35;margin:10px 0}
+.overlay .addr{font-size:22px;line-height:1.5}
+
+/* 底部 tab */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:var(--paper)}
+.tabbar .strip{height:10px;background-image:var(--tilestrip);background-size:20px 10px;border-top:2px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.tabbar .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.tb{border:0;background:none;padding:4px 0 2px;cursor:pointer;font-family:var(--hand);font-size:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px;--r:14px}
+.tb svg{width:25px;height:25px}
+.tb.on{color:var(--deep);--bg:var(--mint)}
+.tb:not(.on)::before,.tb:not(.on)::after{display:none}
+.foot{text-align:center;font-size:11px;color:var(--muted);margin:18px 0 6px}
+</style>
+</head>
+<body>
+<svg class="svgdefs" aria-hidden="true">
+  <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+  </filter>
+  <symbol id="frangipani" viewBox="-24 -24 48 48">
+    <g stroke="#2c3a33" stroke-width="1.4" stroke-linejoin="round">
+      <g fill="#fbf8ee">
+        <path id="pt" d="M0 0C-8-5-9-17-2-21 4-23 9-17 6-9 4-4 2-2 0 0z"/>
+        <use href="#pt" transform="rotate(72)"/><use href="#pt" transform="rotate(144)"/>
+        <use href="#pt" transform="rotate(216)"/><use href="#pt" transform="rotate(288)"/>
+      </g>
+      <circle r="4.5" fill="#cfa556"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="title-card rough">
+      <svg class="flower f1"><use href="#frangipani"/></svg>
+      <svg class="flower f2"><use href="#frangipani"/></svg>
+      <h1>南洋<span>漫游</span>记</h1>
+      <p class="sub">深圳 → 星洲 → 曼谷 → 深圳 ｜ 2026.11.22 – 12.01</p>
+      <div class="clocks" id="clocks"></div>
+      <div class="countdown" id="countdown"></div>
+    </div>
+    <svg class="shophouses" id="shophouses" viewBox="0 0 440 96" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  </header>
+  <div class="five-foot"></div>
+
+  <nav class="days" id="days"></nav>
+
+  <main>
+    <section id="tab-home" class="tab active">
+      <div class="dayhead" id="dayHead"></div>
+      <div class="card rough" id="stay"></div>
+      <div class="card rough" id="weather"></div>
+      <div class="card rough" id="prep" style="display:none"></div>
+      <div class="card rough" id="mapCard">
+        <h3><span class="ic" data-ic="map"></span>今日地图 <span class="tag">数字 = 行程顺序</span></h3>
+        <div id="map"></div>
+      </div>
+      <div class="card rough" id="itin"></div>
+      <div class="card rough" id="todo"></div>
+      <div class="card rough" id="news"></div>
+      <a id="notesBtn" class="notes-btn rough" target="_blank" rel="noopener"></a>
+    </section>
+    <section id="tab-food" class="tab"></section>
+    <section id="tab-shop" class="tab"></section>
+    <section id="tab-tips" class="tab"></section>
+    <section id="tab-wallet" class="tab"></section>
+    <p class="foot">天气 Open-Meteo ｜ 汇率 ExchangeRate-API ｜ 新闻 GDELT ｜ 地图 OpenStreetMap · CARTO<br>店铺与政策信息出发前请再确认</p>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="box rough" id="overlayBox"></div>
+  <button class="btn solid" style="margin-top:22px;font-size:15px;padding:8px 22px" onclick="document.getElementById('overlay').classList.remove('show')">关闭</button>
+</div>
+
+<footer class="tabbar">
+  <div class="strip"></div>
+  <div class="in" id="tabbar"></div>
+</footer>
+
+<script>
+/* ======================== 设置：以后改这里 ======================== */
+// 共享笔记：把腾讯文档链接填在引号里
+const SHARED_NOTES_URL = "";
+
+const CITIES = {
+  sz: { name:"深圳", tz:"Asia/Shanghai", lat:22.5431, lon:114.0579 },
+  sg: {
+    name:"新加坡", tz:"Asia/Singapore", lat:1.2903, lon:103.8519,
+    news:"Singapore sourcecountry:singapore sourcelang:english",
+    sos:[["报警 999","tel:999"],["救护车/火警 995","tel:995"],["外交部领保 12308","tel:+861012308"]],
+    srcs:[["联合早报","https://www.zaobao.com.sg/realtime/singapore"],["CNA 亚洲新闻台","https://www.channelnewsasia.com/singapore"],["新加坡气象局","https://www.weather.gov.sg/home/"]]
+  },
+  bkk: {
+    name:"曼谷", tz:"Asia/Bangkok", lat:13.7563, lon:100.5018,
+    news:"Bangkok sourcecountry:thailand sourcelang:english",
+    sos:[["旅游警察 1155","tel:1155"],["报警 191","tel:191"],["急救 1669","tel:1669"],["外交部领保 12308","tel:+861012308"]],
+    srcs:[["泰国世界日报","https://www.udnbkk.com/"],["Bangkok Post","https://www.bangkokpost.com/thailand"],["泰国气象局","https://www.tmd.go.th/en"]]
+  }
+};
+
+// 航班：拿到航班号和时间后填进来
+const FLIGHTS = [
+  { date:"11/22 周日", no:"ZH229", air:"深圳航空", from:"深圳", fromCode:"SZX", fromT:"宝安 T3", to:"新加坡", toCode:"SIN", toT:"樟宜机场", dep:"13:05", arr:"17:15", dur:"4 小时 10 分",
+    note:"建议 10:00 前到宝安机场 T3 值机", go:"10:00" },
+  { date:"11/26 周四", no:"TR610", air:"酷航 Scoot", from:"新加坡", fromCode:"SIN", fromT:"樟宜 T1", to:"曼谷", toCode:"BKK", toT:"素万那普", dep:"16:00", arr:"17:35", dur:"2 小时 35 分",
+    note:"廉航：托运行李、餐食要另买；13:00 起可在 Jewel 早到值机", go:"11:30" },
+  { date:"12/01 周二", no:"CZ8324", air:"中国南方航空", from:"曼谷", fromCode:"BKK", fromT:"素万那普", to:"深圳", toCode:"SZX", toT:"宝安机场", dep:"19:15", arr:"22:55", dur:"2 小时 40 分",
+    note:"有退税的话要更早到，先办退税再值机", go:"16:00" }
+];
+
+// 酒店：local 是给出租车司机看的当地语言地址
+const HOTELS = [
+  { city:"sg", place:"新加坡 · 克拉码头", from:"2026-11-22", to:"2026-11-26", dates:"11/22 – 11/26（4 晚）",
+    name:"琵拉帝诗酒店", en:"Paradox Singapore Merchant Court", room:"尊贵特大床房",
+    addr:"20 Merchant Road, Singapore 058281", local:"Paradox Singapore Merchant Court, 20 Merchant Road, Singapore 058281",
+    lat:1.2887, lon:103.8466,
+    note:"对面商场（Clarke Quay Central）地下就是 Clarke Quay 地铁站（紫色东北线），过马路即到" },
+  { city:"bkk", place:"曼谷 · 湄南河西岸", from:"2026-11-26", to:"2026-11-27", dates:"11/26 – 11/27（1 晚）",
+    name:"曼谷河畔安凡尼酒店", en:"AVANI+ Riverside Bangkok Hotel", room:"阿瓦尼河景房",
+    addr:"257 Charoen Nakhon Rd, Khwaeng Samre, Thon Buri, Bangkok 10600",
+    local:"โรงแรม อวานี พลัส ริเวอร์ไซด์ กรุงเทพ · 257 ถนนเจริญนคร แขวงสำเหร่ เขตธนบุรี กรุงเทพฯ 10600",
+    lat:13.7195, lon:100.5040,
+    note:"在河对岸（吞武里一侧），离 ICONSIAM 不远，晚上到可以直接河边吃饭" },
+  { city:"bkk", place:"安帕瓦 · 水上市场旁", from:"2026-11-27", to:"2026-11-28", dates:"11/27 – 11/28（1 晚）",
+    name:"班印轩家庭旅馆", en:"Baan Ing Suan, Amphawa", room:"大床房（带阳台）",
+    addr:"28 Klong Bang Chak, Amphawa, Samut Songkhram",
+    local:"บ้านอิงสวน · 28 คลองบางจาก อัมพวา สมุทรสงคราม",
+    lat:13.4256, lon:99.9553,
+    note:"家庭旅馆，晚上要看萤火虫、逛夜市，建议提前和房东确认到达时间" },
+  { city:"bkk", place:"大城府 · 古城", from:"2026-11-28", to:"2026-11-29", dates:"11/28 – 11/29（1 晚）",
+    name:"夏玛雷斯登斯", en:"Syama Residence and Café", room:"特大床房 · 禁烟",
+    addr:"5 U Thong Rd, Tambon Pratuchai, Phra Nakhon Si Ayutthaya 13000",
+    local:"",
+    lat:14.3517, lon:100.5600,
+    note:"在古城区，离大城历史公园和河边都很近；入住 14:00–19:00，前台 9:00–18:00，晚于 18:00 到要提前联系酒店" },
+  { city:"bkk", place:"曼谷 · 暹罗广场", from:"2026-11-29", to:"2026-12-01", dates:"11/29 – 12/01（2 晚）",
+    name:"诺富特暹罗广场酒店", en:"Novotel Bangkok Siam Square", room:"高级大床房",
+    addr:"392/44 Siam Square Soi 6, Rama 1 Rd, Pathum Wan, Bangkok 10330",
+    local:"โรงแรมโนโวเทล กรุงเทพ สยามสแควร์ · 392/44 ซอยสยามสแควร์ 6 ถนนพระราม 1 แขวงปทุมวัน เขตปทุมวัน กรุงเทพฯ 10330",
+    lat:13.7457, lon:100.5331,
+    note:"BTS Siam / National Stadium 站步行可达，逛街、去机场都方便" }
+];
+
+// s: "fixed" = 已确定；"idea" = 建议，可改。go = 怎么去，tip = 小提醒
+const DAYS = [
+  { date:"2026-11-21", city:"sz", type:"prep", title:"出发前一天 · 整装待发", items:[] },
+
+  { date:"2026-11-22", city:"sg", title:"深圳起飞 · 落地狮城", items:[
+    {t:"10:00", n:"到达深圳宝安机场 T3", en:"Shenzhen Bao'an International Airport", lat:22.6393, lon:113.8107, s:"fixed", d:"国际航班值机、托运、出境", tip:"充电宝随身带，不能托运；出境前把 SG Arrival Card 再确认一遍"},
+    {t:"13:05", n:"ZH229 飞往新加坡", s:"fixed", fl:0},
+    {t:"17:15", n:"抵达新加坡樟宜机场", en:"Changi Airport", lat:1.3644, lon:103.9915, s:"fixed", d:"不在机场逗留，入境、取行李后直接去酒店（约 45–60 分钟）；中国护照可走自动通道", go:"到达厅买电话卡 / 开 eSIM，然后打 Grab 去酒店", tip:"星耀樟宜留到 11/26 再逛"},
+    {t:"19:00", n:"入住琵拉帝诗酒店", en:"Paradox Singapore Merchant Court", lat:1.2887, lon:103.8466, s:"fixed", d:"尊贵特大床房，连住 4 晚；放行李、洗把脸，休息 20 分钟", go:"机场打 Grab 到 Merchant Road，约 25–30 分钟", tip:"入住时酒店一般要刷信用卡做押金，带上带国际币种的信用卡；要安静就说想要高楼层、背对河边的房间"},
+    {t:"20:00", n:"新加坡河游船 Bumboat", en:"Singapore River Cruise Clarke Quay Jetty 3 River Valley Rd", lat:1.2897, lon:103.8465, s:"fixed", d:"传统平底小船，全程约 40 分钟，夜里两岸亮灯，从 Clarke Quay Jetty 上船并回到同一码头", go:"从酒店步行 5 分钟左右到 Clarke Quay Jetty（3 River Valley Rd）", tip:"周日首班 10:00、末班 21:00 开，你们 20:00 上船没问题；网上买的票要在这个码头兑换；常见路线会经过船码头、鱼尾狮、金沙一带，以船上广播为准；晚上河边风大，带件薄外套"},
+    {t:"21:00", n:"晚饭：珍宝海鲜 Jumbo Seafood", en:"JUMBO Seafood Riverside Point 30 Merchant Rd #01-01/02", lat:1.2891, lon:103.8453, s:"fixed", d:"辣椒螃蟹、黑胡椒螃蟹、麦片虾、炸馒头，在酒店隔壁（河滨坊 Riverside Point），游船上完岸边走几步", go:"从码头步行约 5 分钟，酒店就在旁边，吃完直接回房", tip:"每天营业 11:30–23:00；周日晚上人多，建议提前通过 Jumbo 官网或电话订位。螃蟹按重量计价，点之前问清每公斤价格，两个人一只中等大小的螃蟹配一两个小菜就够"}
+  ], todos:["确认 SG Arrival Card 已提交","机场买电话卡或开 eSIM","手机装好 Grab","提前买好 Bumboat 船票（20:00 场）","订 Jumbo 21:00 的位子"]},
+
+  { date:"2026-11-23", city:"sg", title:"如切 · 老机场路 · 榴莲街 · 哈芝巷 · 翡翠山", items:[
+    {t:"09:15", n:"出发去如切", en:"Chin Mee Chin Confectionery 204 East Coast Rd", lat:1.3051, lon:103.9092, s:"idea", d:"从酒店打 Grab 约 20 分钟；今天路线：如切 → 老机场路食阁 → 榴莲街 → 哈芝巷 → Selegie → 翡翠山，晚上约 21:00 回到酒店", go:"直接到 Chin Mee Chin（204 East Coast Rd）下车", tip:"Geylang 在老机场路和甘榜格南之间，顺路；Selegie 放在哈芝巷和翡翠山之间，11/24 就不用赶了"},
+    {t:"09:40", n:"早餐：Chin Mee Chin 老饼店", en:"Chin Mee Chin Confectionery 204 East Coast Rd", lat:1.3051, lon:103.9092, s:"fixed", d:"1925 年开的老式咖啡饼店，炭烤咖椰吐司（约 S$2.8）配半熟蛋、奶油角（cream horn）、各口味包和蛋糕；店内有老式大理石桌和花砖地板", go:"每天 8:00–16:00 营业，最后点单 15:45；离 Marine Parade 地铁站步行约 10 分钟", tip:"2018 年关过，现在由原家族重开；吐司蘸半熟蛋和酱油，是正宗吃法；回如切路上可以在 Kim Choo Kueh Chang（60 Joo Chiat Place，每天 9:00–21:00）买几块娘惹糕点带着吃"},
+    {t:"10:20", n:"Koon Seng Road 彩色排屋", en:"Koon Seng Road Singapore", lat:1.3127, lon:103.9006, s:"fixed", d:"新加坡最出名的娘惹彩色排屋，早上人少、光线柔；再看后巷的彩色门、附近的壁画", go:"从 Chin Mee Chin 打车约 5 分钟；住宅区，拍照轻声、别挡路", tip:"拍完 10:55 走去隔壁的 Peranakan Mansion"},
+    {t:"11:00", n:"Singapore Peranakan Mansion 娘惹博物馆", en:"Singapore Peranakan Mansion 283A Joo Chiat Rd", lat:1.3125, lon:103.9012, s:"fixed", d:"如切路上的娘惹私人博物馆：娘惹古董家具、青花瓷、150 年的婚床、串珠鞋、kebaya 和首饰；导览约 1–2 小时，娘惹体验和服装拍摄在这里做", go:"在 283A Joo Chiat Rd，离 Koon Seng Road 步行几分钟", tip:"只接受预约（电话 +65 9789 7628 或 Facebook）；文化导览约 S$38 每人；手机自拍版的娘惹服拍照约 S$50 每人起，专业摄影棚版 S$980 起；每天 11:00 开门（周三 9:00 起）。预约时问清当天时间、能不能试衣、拍照价格，如果要拍照就留 2.5 小时"},
+    {t:"13:30", n:"午饭：老机场路食阁", en:"Old Airport Road Food Centre 51 Old Airport Rd", lat:1.3085, lon:103.8878, s:"fixed", d:"新加坡最有名的食阁之一，1973 年开，约 170 个摊位；推荐摊位：新美香正宗卤面（#01-116，每天 7:00–16:00，卤面 S$6/8）、祥记卤面（#01-81，周三到周一 7:00–15:00，S$4/5）、东记炒粿条（#01-138，周一到周六 11:00–20:00，S$4–6）、老夫子炒粿条（#01-12，必比登推介；米其林指南页面写周一 11:45–22:00 营业、周三和周六休息，另有网站写每天营业，以 Google 地图当天显示为准）、Hua Ji 鱼头米粉（#01-118，周五到周三 12:30–21:00，鱼汤 S$7）、Toa Payoh 罗杂（#01-108，周一到周六，S$3 起）；甜品：Whampoa 豆花（#01-68，每天 8:00–20:00）", go:"从如切打 Grab 约 10 分钟；每份 S$4–8，两个人点 3–4 样分着吃", tip:"摊位时间来自网上资料，可能有变，去之前在 Google 地图看一下；14:30 前吃完"},
+    {t:"14:45", n:"榴莲街 · Geylang 榴莲摊", en:"Durian 36 608 Geylang Rd", lat:1.3172, lon:103.8888, s:"fixed", d:"Geylang Road 靠 Lorong 36 路口一带，沿着骑楼摆桌椅；Durian 36（608 Geylang Rd）标注 24 小时营业，主打猫山王", go:"从老机场路食阁打 Grab 约 6–8 分钟；吃完直接打车去哈芝巷，别坐地铁", tip:"另一些摊位傍晚才开，下午去先确认 Durian 36 开着（电话 9889 4906）；11–12 月是榴莲小季，点之前问清按个还是按公斤，让老板帮你开、先试再买；榴莲不能带进酒店和地铁，就在摊边吃；Geylang 有些街区夜里复杂，白天只在大路沿线的摊位；吃完洗手漱口，包里放无味湿巾和口香糖"},
+    {t:"15:45", n:"去甘榜格南", en:"Haji Lane Singapore", lat:1.3009, lon:103.8590, s:"idea", d:"从 Geylang 打 Grab 约 15–20 分钟；路上开窗透气", go:"在 Haji Lane 路口下车"},
+    {t:"16:05", n:"哈芝巷 Haji Lane", en:"Haji Lane Singapore", lat:1.3009, lon:103.8590, s:"fixed", d:"新加坡最窄的潮流小巷，两边是彩色壁画和小店：Coffee Donkee（51 号，秋千和草坪，10:30–18:30）、Vintagewknd 古着（41 号，12:00–21:00）、Musicology Records 黑胶（66 号，12:30–20:30）、Gelato Garden（65 号，11:00–22:00）、Solace Airlines 韩式写真馆（73 号，11:00–22:00，可以拍一组）、Crafune 手作皮具工作坊（#02-01 38 号，11:00–18:00，做钱包）、Hands on Film 胶片相机（Bali Lane 21 号，11:00–19:00）", go:"在哈芝巷和旁边的 Bali Lane 慢慢逛，约 1.5 小时", tip:"天黑后霓虹壁画更好看；商店营业时间来自网上资料，可能有出入"},
+    {t:"17:15", n:"Bussorah Street · 苏丹回教堂", en:"Masjid Sultan Singapore Bussorah Street", lat:1.3023, lon:103.8583, s:"idea", d:"从哈芝巷走到 Arab Street 和 Bussorah Street：棕榈树大道尽头就是金顶的苏丹回教堂，Arab Street 一带有土耳其地毯、布料、香料小店", go:"从哈芝巷步行约 5 分钟", tip:"进回教堂要遮肩膝、非穆斯林有固定参观时间，赶不上就在外面拍"},
+    {t:"17:45", n:"Selegie Arts Centre 打卡", en:"Selegie Arts Centre 30 Selegie Rd", lat:1.3002, lon:103.8508, s:"fixed", d:"Selegie Road 和 Prinsep Street 路口的楔形老楼，窗框涂满鲜艳的颜色，在外面拍照 15–20 分钟；傍晚的光让颜色更饱和", go:"从苏丹回教堂打 Grab 约 8–10 分钟，往乌节路方向顺路", tip:"大楼里有咖啡店、画材店和画廊，开放时间我没查到，外面拍就够"},
+    {t:"18:10", n:"出发去翡翠山", en:"Peranakan Place 180 Orchard Rd", lat:1.3010, lon:103.8387, s:"idea", d:"从 Selegie 打 Grab 约 12 分钟，日落约 18:45，到的时候是黄昏", go:"在 Peranakan Place（180 Orchard Rd）下车，就是翡翠山路口"},
+    {t:"18:25", n:"翡翠山历史保护区 Emerald Hill", en:"Emerald Hill Road Singapore", lat:1.3005, lon:103.8385, s:"fixed", d:"1901–1925 年建的联排洋楼，多是娘惹家族住宅，1989 年划为保护区；看点：路口 Peranakan Place 1902 年的六间两层店屋、中式巴洛克花板、彩色花砖、「平多帕加」旋转木门、五脚基走廊；黄昏到天黑灯光下很有气氛", go:"从 Peranakan Place 走上 Emerald Hill Road，沿路慢慢走一圈，约 1 小时", tip:"大多是私人住宅，只在路上拍照，别进院子、别大声说话；天黑后光线弱，手机开夜景模式；我没核对具体门牌，沿着最花的几栋拍就可以"},
+    {t:"19:45", n:"晚饭：National Kitchen by Violet Oon（国家美术馆）", en:"National Kitchen by Violet Oon National Gallery Singapore 1 St Andrew's Rd #02-01", lat:1.2903, lon:103.8517, s:"fixed", d:"在 1920 年代的老市政厅大楼二楼（国家美术馆 City Hall 侧翼），Violet Oon 的娘惹菜，有大厅和露台座位，比商场里那家更有历史感；官网上能确认的招牌是 Kunyit Lemak 椰浆姜黄杏鲍菇；其他菜（黑果炖鸡 Ayam Buah Keluak、叻沙、辣椒椰浆虾、海南猪排等）是同一位主厨的招牌，美术馆店的菜单相近，具体以当天为准；晚餐 18:00–22:30，最后点单 21:30", go:"从翡翠山 Grab 约 15–20 分钟（晚上车多可能到 25 分钟）；从 Coleman Street 入口进美术馆，上二楼 #02-01", tip:"提前订位：violetoon.com、电话 +65 9834 9935、或 eat@violetoon.com，订 19:45；价格我没有从官网核到，先别记数字；备选：ION Orchard 的 Violet Oon（#04-12，离翡翠山更近）、Bonding Kitchen（Orchard Gateway #02-18）；吃完从美术馆回 Clarke Quay 只要 7–10 分钟"},
+    {t:"21:30", n:"打车回酒店", en:"Paradox Singapore Merchant Court", lat:1.2887, lon:103.8466, s:"idea", d:"美术馆 → Clarke Quay 约 7–10 分钟，大约 21:40 到酒店；也可以沿河慢慢走回去，约 20 分钟；衣服有榴莲味，回房先洗澡", tip:"榴莲味重，穿的衣服先装塑料袋；鱼尾狮不在回酒店的路上，11/25 下午 16:00 去"}
+  ], todos:["预约 Peranakan Mansion 11:00 导览（电话 +65 9789 7628）","订 National Kitchen by Violet Oon 19:45 的位子（violetoon.com 或 +65 9834 9935）","带无味湿巾、口香糖、防晒、薄外套","穿舒服的鞋，充电宝带好"]},
+
+  { date:"2026-11-24", city:"sg", title:"警察局 · 福康宁 · 两座博物馆 · 夜间动物园", items:[
+    {t:"08:30", n:"Old Hill Street Police Station（彩虹窗大楼）", en:"Old Hill Street Police Station 140 Hill St", lat:1.2900, lon:103.8472, s:"fixed", d:"927 扇彩色窗户的 1934 年老警察局，新加坡最好认的彩色建筑，1998 年成为国家古迹；对面马路退后一点可以拍到全景", go:"从酒店步行约 8–10 分钟，或 Clarke Quay 站走 3 分钟", tip:"一楼有画廊和 Atrium @ MCI，开放时间我没查到，外面拍就够；早上光线柔、人少"},
+    {t:"09:00", n:"福康宁公园 Fort Canning Park", en:"Fort Canning Park Singapore", lat:1.2950, lon:103.8458, s:"fixed", d:"24 小时开放，免费；看点：Fort Gate、Spice Garden（180 多种香料植物）、东盟雕塑园、历史花园；约 45 分钟，边逛边往土生博物馆那一侧走", go:"从 Old Hill Street Police Station 往山上走，步行约 5–10 分钟", tip:"早上凉快；山上蚊子多，带驱蚊液；9:50 前要走到 Armenian Street"},
+    {t:"10:00", n:"土生华人博物馆", en:"Peranakan Museum 39 Armenian St", lat:1.2942, lon:103.8487, s:"fixed", d:"新加坡最全的土生华人（娘惹 / 峇峇）文化博物馆：嫁妆、珠绣、金饰、婚礼文化，约 1.5–2 小时", go:"从福康宁公园步行约 10 分钟", tip:"每天 10:00–19:00，最晚入场约 18:30；外国游客门票约 S$16（需以官网为准）；11:45 看完后可以去隔壁 Armenian Street 逛逛再走去吃饭"},
+    {t:"12:30", n:"午饭：HolyCrab（Capitol）", en:"HolyCrab 13 Stamford Rd #01-85 Capitol Singapore", lat:1.2937, lon:103.8512, s:"fixed", d:"斯里兰卡式螃蟹：绿辣椒蟹、胡椒蟹、配炸馒头；在 Capitol Kempinski 的 13 Stamford Rd #01-85，离土生博物馆步行约 10 分钟，吃完去国家博物馆也顺路", go:"电话 +65 8444 2722，或在 Chope 上订位", tip:"店很小，有评论说常常客满，建议先订 12:30 的位子；人均约 S$40，螃蟹按重量计价，点前问清价格；11/22 在 Jumbo 吃过一次螃蟹，这顿可以点小份；14:00 前要吃完走"},
+    {t:"13:45", n:"新加坡国家博物馆", en:"National Museum of Singapore 93 Stamford Rd", lat:1.2966, lon:103.8485, s:"fixed", d:"新加坡最古老的博物馆，约 4 小时，看到 18:00 左右（博物馆 19:00 关门）", go:"从 Capitol 步行约 10–12 分钟", tip:"每天 10:00–19:00，外国游客约 S$15；新加坡历史馆之前有一段时间在整修，目前开放哪些展厅我没查到，去之前看官网（nationalmuseum.nhb.gov.sg）；4 小时较长，可中途去里面的咖啡馆休息"},
+    {t:"18:15", n:"去 Sixth Avenue", s:"idea", d:"离开博物馆后打 Grab 约 20–25 分钟（晚高峰可能到 30 分钟），到 18:45 左右"},
+    {t:"18:45", n:"晚饭：Kopi House 1990 @ Sixth Ave", en:"Kopi House 1990 24 Sixth Ave Singapore 276481", lat:1.3317, lon:103.7966, s:"fixed", d:"武吉知马的老式咖啡店，主打 CTE 套餐（咖啡、吐司、蛋）、蛋挞、咖喱角", go:"地铁 Downtown 线 Sixth Avenue 站", tip:"每天 5:00–23:00 营业，主要是咖啡店轻食，不算正餐；要赶 20:15 的场次，19:35 出发就来得及，可以吃 45 分钟；园里 18:30 起也有餐厅，可以再补一顿"},
+    {t:"19:35", n:"出发去夜间动物园", s:"idea", d:"从 Sixth Avenue 打车约 25–30 分钟（17 点后车费加 S$5 附加费）", tip:"Selegie 挪走后时间松了一些；想更从容也可以买 21:15 场次"},
+    {t:"20:15", n:"夜间动物园 Night Safari", en:"Night Safari Singapore 80 Mandai Lake Rd", lat:1.4022, lon:103.7897, s:"fixed", d:"世界首个夜间动物园，场次入场时间 19:15 / 20:15 / 21:15 / 22:15，最晚 23:15，约 3 小时；乘园内小火车约 30 分钟，Creatures of the Night 表演每晚 19:30、20:30、21:30", go:"回程打车约 25–30 分钟，先在 Grab 上叫好；你们约 23:30 离开，00:15 左右到酒店", tip:"门票约 S$58 起，含小火车约 S$64，提前 2–5 天买；动物区禁止闪光灯；今天从早上 8:30 一直在外面，注意体力，晚上冷可以带件外套"}
+  ], todos:["订夜间动物园门票（选 20:15 或 21:15 场次）","预订 HolyCrab 12:30 位子（Chope 或电话）","提前查国家博物馆目前开放的展厅","带薄外套、驱蚊液、充电宝（一整天不回酒店）"]},
+
+  { date:"2026-11-25", city:"sg", title:"牛车水 · 鱼尾狮 · 滨海湾花园 · 榴莲鸡火锅", items:[
+    {t:"09:00", n:"东亚 Tong Ah Eating House（早餐）", en:"Tong Ah Eating House 35 Keong Saik Rd", lat:1.2802, lon:103.8419, s:"fixed", d:"1939 年的老店，炭烤脆吐司配咖椰和半熟蛋；一份套餐 S$5–7 左右", go:"从酒店 Grab 约 10 分钟，或 Clarke Quay → Outram Park 站再步行", tip:"周三只开到 14:00（其他日子 7:00–22:00），要早点去；我是按「东亚」猜的 Tong Ah，如果不是请告诉我"},
+    {t:"10:00", n:"Tong Mern Sern Antiques Arts & Crafts", en:"Tong Mern Sern 51 Craig Rd", lat:1.2787, lon:103.8428, s:"fixed", d:"三层老排屋，塞满老物件：翡翠白菜、墙上的瓷盘、楼梯上的老打字机、老式梳妆台、能放音乐的古董钟", go:"从东亚步行约 5 分钟；每天 9:00–18:00 营业", tip:"不一定每件都卖，想买先问；拍照前先问店主"},
+    {t:"11:30", n:"BabyFang（Tras Link）午饭", en:"Baby Fang 1 Tras Link #01-07", lat:1.2758, lon:103.8457, s:"fixed", d:"印尼 / 南洋风咖啡简餐店，招牌有 Indomie 和鸡饭；在 Tanjong Pagar 的 1 Tras Link #01-07", go:"从 Craig Rd 步行约 10–12 分钟；周二到周五 11:30–15:30、17:30–22:45", tip:"我按这一家排的，如果你说的 BabyFang 是别家（比如别的分店），把地址发我；营业时间来自外卖平台，可能有出入"},
+    {t:"12:45", n:"佛牙寺（牛车水的庙）", en:"Buddha Tooth Relic Temple 288 South Bridge Rd", lat:1.2814, lon:103.8441, s:"fixed", d:"牛车水最有名的庙，免费参观，四层殿堂和佛牙舍利", go:"从 Tras Link Grab 约 5 分钟，或步行 15 分钟", tip:"进寺要遮肩、过膝；你说的「牛车水的庙」没写名字，我先排佛牙寺。如果你想去的是 Sri Mariamman（印度庙）或天福宫，告诉我我换掉，它们都在附近"},
+    {t:"13:45", n:"大中国 Tai Chong Kok（Sago Street）", en:"Tai Chong Kok 38 Sago St", lat:1.2828, lon:103.8446, s:"fixed", d:"老牌广式饼家，招牌是小猪酥（约 S$2 两个）、坚果月饼；每天 9:30–20:00 营业", go:"从佛牙寺步行约 5 分钟", tip:"买一两样现吃，别买多，今天还要走很多路"},
+    {t:"14:15", n:"Chinatown Market Wall · 叶耀聪牛车水壁画", en:"Chinatown wet market mural 30 Temple St", lat:1.2827, lon:103.8440, s:"fixed", d:"Yip Yew Chong（叶耀聪）画的牛车水壁画：Pagoda St 和 Temple St 之间小巷尽头的「湿巴刹」壁画是逛菜市场的场景，可以摆姿势拍照；附近还有「理发」「木屐匠」等壁画", go:"从 Tai Chong Kok 步行约 5 分钟", tip:"壁画在小巷里，拍照时留意来往的人；附近 Smith Street 的 Chinatown Complex 地面层柱子上也有李小龙和招财猫的壁画"},
+    {t:"15:00", n:"回酒店休息", en:"Paradox Singapore Merchant Court", lat:1.2887, lon:103.8466, s:"idea", d:"从牛车水回 Clarke Quay 地铁 1 站；洗澡、换衣服、充电，休息 45 分钟", go:"Chinatown 站 → 东北线（紫）Clarke Quay 站，1 站"},
+    {t:"16:00", n:"鱼尾狮公园 Merlion Park", en:"Merlion Park One Fullerton 1 Fullerton Rd", lat:1.2868, lon:103.8545, s:"fixed", d:"新加坡的象征，背后是金沙酒店；24 小时开放；11:00–15:00 光线最硬、人最多，16:00 以后好很多，下午到傍晚金沙正面受光，拍照最好", go:"从酒店 Grab 约 10 分钟，或沿河步行约 15–25 分钟", tip:"11/22 的 Bumboat 路线会经过这里，从水上看一遍；今天是在岸上拍近景。最好的位置在雕像正前方，人多时等一两分钟就能等到空档。拍完 16:45 出发去滨海湾花园"},
+    {t:"17:15", n:"滨海湾花园 · Golden Garden · 空中走廊", en:"Gardens by the Bay Supertree Grove", lat:1.2816, lon:103.8636, s:"fixed", d:"户外花园免费；天快黑时上 OCBC Skyway（空中走廊）看日落，晚 21:00 关闭，最晚入场 20:30；冷凝馆 Cloud Forest 和花穹 Flower Dome 要买票，最晚入场 20:00 / 20:30", go:"从鱼尾狮公园打 Grab 约 10–15 分钟", tip:"日落约 18:45，先拍照再看灯光秀；Garden Rhapsody 当晚有 19:45 和 20:45 两场，你们看 19:45 的，之后有时间吃火锅"},
+    {t:"19:45", n:"Garden Rhapsody 灯光秀", en:"Supertree Grove Gardens by the Bay", lat:1.2816, lon:103.8636, s:"fixed", d:"Supertree 随音乐变灯光，约 15 分钟，免费；躺在地上看最舒服", tip:"圣诞特别版 11/27 才开始，赶不上"},
+    {t:"20:30", n:"榴莲鸡火锅：Bafu Durian Chicken", en:"Bafu Durian Chicken 18 Smith Street", lat:1.2831, lon:103.8443, s:"idea", d:"牛车水 Smith Street 18 号，每天 11:00–22:00 营业；招牌用猫山王榴莲、走地鸡、泰国椰青，汤底有榴莲椰青和酸汤两种", go:"灯光秀结束后 Grab 约 20 分钟，也可地铁 Bayfront → Chinatown", tip:"我没查到它的最后点单时间，先电话确认能不能 20:30 到；价格偏贵（$$$$），猫山王点之前问清价格；订不到位备选：回酒店旁 Jumbo 再吃一次，或 Smith Street 上其他小吃"}
+  ], todos:["提前订 Bafu 20:30 的位置","买好伴手礼放行李箱，确认行李重量","出发前 3 天内提交泰国 TDAC","今天路线长，穿舒服的鞋；带小电扇或水"]},
+
+  { date:"2026-11-26", city:"bkk", title:"告别狮城 · 樟宜机场 · 飞往曼谷", items:[
+    {t:"09:30", n:"酒店早餐 · 慢慢收拾", s:"idea", d:"不赶时间，把行李整理好，检查护照、充电宝放随身包"},
+    {t:"11:00", n:"退房（琵拉帝诗）", en:"Paradox Singapore Merchant Court", lat:1.2887, lon:103.8466, s:"fixed", d:"退房后带着行李直接去樟宜机场，不用回酒店", tip:"押金退还情况退房时确认；酒店一般中午前退房"},
+    {t:"11:30", n:"去樟宜机场 · 星耀樟宜", en:"Jewel Changi Airport", lat:1.3602, lon:103.9898, s:"fixed", d:"从酒店 Grab 约 25–30 分钟到 Jewel，星耀樟宜和 T1 有天桥相连", go:"在 Jewel 下车，不要直接去 T1 出发层，行李先带着逛", tip:"11:30 到的话离 13:00 还有一阵，可以先吃午饭"},
+    {t:"12:15", n:"星耀樟宜 · 雨漩涡 · 森林谷", en:"Jewel Changi Airport Rain Vortex", lat:1.3602, lon:103.9898, s:"idea", d:"40 米高的室内瀑布（每天 10:00–22:00），森林谷步道、商场、各种吃的", tip:"瀑布晚上才有灯光秀（20:00 起），白天你们只能看到瀑布本身；Canopy Park 里的付费项目要提前看官网"},
+    {t:"13:00", n:"Jewel 早到值机 · 寄行李", en:"Jewel Changi Airport Early Check-in Lounge", lat:1.3602, lon:103.9898, s:"fixed", d:"酷航可以在 Jewel 一层的早到值机柜台办，起飞前 3 小时开始、最早可提前 18 小时，办完行李就不用拖着逛了", tip:"柜台在 Jewel 1 楼；先看订单里的托运额度，不含的话现场加购比较贵"},
+    {t:"14:30", n:"去 T1 出境", en:"Changi Airport Terminal 1", lat:1.3618, lon:103.9893, s:"fixed", d:"从 Jewel 走天桥到 T1，过海关、免税店逛逛", tip:"买满一定金额的商品，记得在机场办消费税退税；登机口提前查，T1 很大"},
+    {t:"16:00", n:"TR610 飞往曼谷", s:"fixed", fl:1},
+    {t:"17:35", n:"抵达曼谷素万那普机场", en:"Suvarnabhumi Airport", lat:13.6900, lon:100.7501, s:"fixed", d:"曼谷比新加坡慢 1 小时，手机时间会自动调整", go:"带着行李建议直接打 Grab / 机场出租车，约 1 小时（晚高峰可能更久）", tip:"出口有电话卡柜台；提前填好 TDAC；出租车坚持打表，说 meter please"},
+    {t:"20:30", n:"入住曼谷河畔安凡尼酒店", en:"AVANI+ Riverside Bangkok Hotel", lat:13.7195, lon:100.5040, s:"fixed", d:"阿瓦尼河景房，只住 1 晚", tip:"明早 7:30 左右要退房出发去安帕瓦，今晚就把行李分好：一个小包装 11/27–11/28 两晚用的东西，大箱子放包车"},
+    {t:"21:30", n:"ICONSIAM 暹罗天地（夜宵）", en:"ICONSIAM", lat:13.7267, lon:100.5106, s:"idea", d:"一楼 SookSiam 室内水上市场，吃点小吃当夜宵", go:"酒店打车几分钟，太累就在酒店河景餐厅吃", tip:"商场一般 22:00 前后关门，晚了就直接回酒店"}
+  ], todos:["确认 TDAC 已提交","买泰国电话卡或开 eSIM","换一些泰铢现金（后面两天去的安帕瓦、大城多数只收现金）","和包车师傅确认明早出发时间和 3 天路线"]},
+
+  { date:"2026-11-27", city:"bkk", wx:{name:"安帕瓦 / 美功", lat:13.4260, lon:99.9570}, title:"水上市场 · 铁道市场 · 安帕瓦", items:[
+    {t:"07:30", n:"退房，包车出发", en:"AVANI+ Riverside Bangkok Hotel", lat:13.7195, lon:100.5040, s:"idea", d:"今天起 3 天（到 11/29 回曼谷市区）建议包一辆带司机的车，大行李放车上", tip:"在携程 / Klook 订，或让酒店前台帮忙叫车；说清楚：丹嫩沙多 → 美功 → 安帕瓦住一晚 → 次日去大城 → 回暹罗广场"},
+    {t:"09:15", n:"丹嫩沙多水上市场", en:"Damnoen Saduak Floating Market", lat:13.5196, lon:99.9590, s:"idea", d:"坐小船逛水上摊贩，越早人越少", go:"从曼谷过来约 1.5–2 小时", tip:"船上买东西记得砍价；游客船费看清楚再上"},
+    {t:"11:45", n:"美功铁道市场", en:"Maeklong Railway Market", lat:13.4074, lon:99.9997, s:"idea", d:"火车从菜市场中间穿过，摊贩瞬间收篷", tip:"火车每天只经过几趟，提前查当天时刻表再决定到的时间"},
+    {t:"14:00", n:"入住班印轩家庭旅馆", en:"Baan Ing Suan Amphawa", lat:13.4256, lon:99.9553, s:"fixed", d:"大床房（带阳台），只住 1 晚", tip:"小旅馆楼梯窄，只带随身小包进去；晚上河边有蚊子，带驱蚊液"},
+    {t:"16:00", n:"安帕瓦水上市场", en:"Amphawa Floating Market", lat:13.4261, lon:99.9564, s:"idea", d:"傍晚到夜里最热闹，河边小吃、烤海鲜、椰子糖", go:"从民宿步行即到", tip:"市场多在周五到周日下午至晚上营业，你们周五周六刚好；现金备好"},
+    {t:"19:30", n:"夜游萤火虫", s:"idea", d:"天黑后坐小船看河边树上的萤火虫", tip:"让民宿帮忙订船或在码头现场议价，晚上防蚊、别开闪光灯"}
+  ], todos:["驱蚊液、防晒、拖鞋装进随身小包","大行李留在包车上，贵重物品随身带","现场用现金，备足小面额泰铢"]},
+
+  { date:"2026-11-28", city:"bkk", wx:{name:"大城", lat:14.3532, lon:100.5600}, title:"安帕瓦清晨 · 大城古城", items:[
+    {t:"07:30", n:"河边散步 · 早餐", s:"idea", d:"早上的河边安静凉快，吃一碗船面或泰式早餐"},
+    {t:"09:30", n:"包车去大城", s:"idea", d:"安帕瓦 → 大城约 2.5–3 小时", tip:"路上可以让司机停一个休息站，买点水和零食"},
+    {t:"12:30", n:"大城午饭", s:"idea", d:"大城出名的是河边船面和 roti sai mai（拉丝糖饼）", tip:"天热中午先吃饭休息，下午再看古迹"},
+    {t:"14:00", n:"入住夏玛雷斯登斯（大城）", en:"Syama Residence and Café Ayutthaya", lat:14.3517, lon:100.5600, s:"fixed", d:"特大床房，只住 1 晚；入住 14:00–19:00", tip:"前台 9:00–18:00，晚于 18:00 到要提前联系酒店；这家酒店不提供机场接送"},
+    {t:"15:30", n:"玛哈泰寺 · 树中佛头", en:"Wat Mahathat Ayutthaya", lat:14.3577, lon:100.5679, s:"idea", d:"佛头被榕树根包住，大城最出名的画面", tip:"古迹大多要买门票，现金；不要爬上遗迹，拍照时人的头不要高过佛头"},
+    {t:"17:15", n:"柴瓦塔那兰寺（看日落）", en:"Wat Chaiwatthanaram", lat:14.3441, lon:100.5435, s:"idea", d:"高棉风格的大佛塔，日落时最美", go:"从玛哈泰寺打车或坐嘟嘟车约 15 分钟", tip:"多数古迹 18:00 前后关门，有的会开灯到晚上"},
+    {t:"19:30", n:"大城夜市晚饭", s:"idea", d:"酒店附近找夜市，吃烤河虾、泰式小吃", tip:"今晚早点休息，明早古迹人少、也凉快"}
+  ], todos:["寺庙着装：遮肩，长裤或过膝裙","防蚊、防晒、带水"]},
+
+  { date:"2026-11-29", city:"bkk", title:"大城清晨 · 回曼谷 · 周日市集", items:[
+    {t:"07:30", n:"大城古迹清晨游", en:"Wat Phra Si Sanphet", lat:14.3563, lon:100.5558, s:"idea", d:"三座白色佛塔，早上光线好、人少", go:"从酒店打车 / 嘟嘟车几分钟", tip:"早上 9 点以后越来越热，尽量早去"},
+    {t:"10:30", n:"退房，包车回曼谷", s:"idea", d:"大城 → 曼谷市区约 1.5–2 小时"},
+    {t:"12:30", n:"入住诺富特暹罗广场酒店", en:"Novotel Bangkok Siam Square", lat:13.7457, lon:100.5331, s:"fixed", d:"高级大床房，连住 2 晚", tip:"通常下午才能入住，到得早就先寄存行李、把行李箱放前台"},
+    {t:"13:30", n:"午饭", s:"idea", d:"暹罗广场一带小吃、商场美食广场都方便"},
+    {t:"15:00", n:"恰图恰周末市场", en:"Chatuchak Weekend Market", lat:13.7999, lon:100.5500, s:"idea", d:"上万个摊位，周日是最后一天，天黑前逛一圈买点东西", go:"BTS Siam → Mo Chit 站，约 20 分钟", tip:"周日一般到 18:00 前后收摊；带现金和零钱"},
+    {t:"19:00", n:"暹罗商圈晚饭 · 逛街", en:"Siam Paragon", lat:13.7462, lon:100.5347, s:"idea", d:"Siam Paragon 美食广场 + 周边商场", go:"BTS Siam 站直通，酒店走路可达"}
+  ], todos:["大城带回的脏衣服集中放一个袋子","打包前清点：前面几天买的伴手礼"]},
+
+  { date:"2026-11-30", city:"bkk", title:"大皇宫 · 湄南河 · 唐人街", items:[
+    {t:"08:30", n:"大皇宫 & 玉佛寺", en:"Grand Palace Bangkok", lat:13.7500, lon:100.4913, s:"idea", d:"曼谷必去，金碧辉煌", go:"从酒店 BTS 到 Saphan Taksin 站 → 昭披耶河快船到 Tha Chang 码头", tip:"着装严格：遮肩、长裤或过膝裙；门口常有人说「今天关门」，不要理会"},
+    {t:"11:30", n:"卧佛寺", en:"Wat Pho", lat:13.7465, lon:100.4930, s:"idea", d:"46 米长的金色卧佛", go:"从大皇宫步行约 10 分钟", tip:"寺里有泰式按摩学校，可以按一按"},
+    {t:"13:00", n:"午饭 + 休息", s:"idea", d:"附近吃个泰式炒河粉，避开最热的时候"},
+    {t:"16:30", n:"郑王庙（看日落）", en:"Wat Arun", lat:13.7437, lon:100.4889, s:"idea", d:"黎明寺，傍晚从对岸看最美", go:"Tha Tien 码头坐渡轮过河，几分钟就到"},
+    {t:"19:00", n:"唐人街 · 耀华力路", en:"Yaowarat Road", lat:13.7406, lon:100.5100, s:"idea", d:"霓虹招牌、街边海鲜、燕窝甜品", go:"MRT 到 Wat Mangkon 站"}
+  ], todos:["大皇宫着装：遮肩，长裤或过膝长裙","收拾行李，泰国伴手礼装箱","确认明天航班时间和去机场方式"]},
+
+  { date:"2026-12-01", city:"bkk", title:"满载而归 · 飞回深圳", items:[
+    {t:"09:00", n:"最后的泰国早餐", s:"idea", d:"酒店附近吃一碗粿条，或 7-Eleven 买最后一波零食"},
+    {t:"10:30", n:"Big C 超市（Ratchadamri）", en:"Big C Ratchadamri", lat:13.7470, lon:100.5398, s:"idea", d:"零食、手标泰茶、芒果干一次买齐", go:"从酒店沿天桥步行约 10 分钟"},
+    {t:"12:00", n:"退房（诺富特），寄存行李", en:"Novotel Bangkok Siam Square", lat:13.7457, lon:100.5331, s:"idea", d:"大多数酒店退房后可以免费寄存行李，让前台挂个牌"},
+    {t:"13:00", n:"泰式按摩 / 最后逛逛", s:"idea", d:"轻松一点，不要排太满"},
+    {t:"16:00", n:"出发去素万那普机场", en:"Suvarnabhumi Airport", lat:13.6900, lon:100.7501, s:"fixed", d:"傍晚曼谷很堵，打车预留至少 1 小时，或 BTS Siam → Phaya Thai 换机场快线", tip:"有退税单的要先去海关盖章、办退税，再值机"},
+    {t:"19:15", n:"CZ8324 飞回深圳", s:"fixed", fl:2},
+    {t:"22:55", n:"抵达深圳宝安机场", en:"Shenzhen Bao'an International Airport", lat:22.6393, lon:113.8107, s:"fixed", d:"欢迎回家", tip:"落地已近 23:00，地铁可能已收班，提前约好接机或网约车"}
+  ], todos:["检查护照、手机、充电器","退税单据放在随身包","剩下的泰铢在机场花掉"]}
+];
+
+// 出发前清单（11/21 显示）
+const PREP = [
+  ["证件与入境", [
+    ["护照", "有效期至少 6 个月以上，拍照存一份到手机"],
+    ["确认签证政策", "中国护照目前对新加坡、泰国都免签，出发前再确认"],
+    ["新加坡 SG Arrival Card", "抵达前 3 天内在线填写（11/19–11/22）"],
+    ["泰国 TDAC 电子入境卡", "抵达前 3 天内在线填写（11/23–11/26）"],
+    ["三段机票行程单", "ZH229 深圳→新加坡、TR610 新加坡→曼谷、CZ8324 曼谷→深圳"],
+    ["两段酒店确认单", "最好存截图，没网也能看"],
+    ["旅行保险", "含医疗和航班延误"]
+  ]],
+  ["钱与支付", [
+    ["Visa / Mastercard 信用卡", "开通境外支付，带两张备用"],
+    ["支付宝 / 微信境外支付", "绑好卡，测试一下"],
+    ["少量现金", "新币和泰铢，泰国市场多数只收现金"]
+  ]],
+  ["通讯与电子", [
+    ["电话卡 / eSIM", "大陆卡漫游上网会受限制，用当地卡最方便"],
+    ["充电宝", "必须随身带，不能托运"],
+    ["转换插头", "新加坡是英标三方脚；泰国国内插头通常能直接用"],
+    ["充电线、耳机", ""]
+  ]],
+  ["手机 App", [
+    ["Grab", "两国打车、外卖都能用"],
+    ["Google 地图（下载离线地图）", "当地卡上网可用"],
+    ["翻译 App", "下载泰语离线包"],
+    ["Klook 或携程", "订门票、一日游"]
+  ]],
+  ["行李", [
+    ["酷航 TR610 行李额度", "廉航票通常不含托运，确认订单里有没有买托运；手提行李有重量限制"],
+    ["回程留出行李空间", "伴手礼会买很多"]
+  ]],
+  ["衣物", [
+    ["轻薄透气的夏装", "两地都在 30°C 上下"],
+    ["遮肩上衣 + 长裤或过膝长裙", "泰国大皇宫、寺庙必须"],
+    ["薄外套", "商场、地铁冷气很足"],
+    ["好走的鞋 + 拖鞋", ""],
+    ["折叠伞", "11 月新加坡多雷阵雨"],
+    ["泳衣", "圣淘沙或酒店泳池"]
+  ]],
+  ["药品与洗护", [
+    ["常用药", "感冒、肠胃、晕车、创可贴"],
+    ["防蚊液", "东南亚有登革热，防蚊很重要"],
+    ["防晒霜、墨镜、帽子", ""],
+    ["个人洗护小样", "液体单瓶不超过 100ml 才能随身"]
+  ]],
+  ["不要带", [
+    ["电子烟", "新加坡、泰国都违法，会被重罚"],
+    ["口香糖", "不能带入新加坡售卖，带了也别在当地乱吐"]
+  ]]
+];
+
+const LORE = [
+ [
+  "深圳宝安机场",
+  "深圳宝安机场 T3 航站楼 2013 年启用，由意大利建筑师 Fuksas 设计，白色蜂窝状的外壳像一只展开的蝠鲼（魔鬼鱼）。深圳在 1980 年设为经济特区之前，只是宝安县的一个边境小镇，四十多年里长成了超大城市。"
+ ],
+ [
+  "抵达新加坡樟宜机场",
+  "樟宜机场 1981 年启用，取代了之前的巴耶利巴机场，后来多次被评为世界最佳机场之一。樟宜这一带二战时也是日军关押战俘和平民的地方。"
+ ],
+ [
+  "入住琵拉帝诗",
+  "酒店附近的克拉码头（Clarke Quay）以海峡殖民地第二任总督安德鲁·克拉克爵士（1873–75 年在任）命名。19 世纪这里是新加坡河边的货运码头，岸边是一排排仓库（godown）；今天的彩色店屋就是这些老仓库和店屋翻新而成。"
+ ],
+ [
+  "Bumboat",
+  "bumboat 原本是新加坡河上运货的平底小驳船：大船停在外海，货物由驳船运进河边仓库，两岸因此成了贸易中心。1977 年起政府花十年清理河道，驳船和小贩迁走；现在游览用的 bumboat 是模仿当年驳船的样子做的。"
+ ],
+ [
+  "Jumbo",
+  "辣椒蟹是新加坡最有代表性的菜之一，相传 1950 年代由 Cher Yam Tian 女士在路边摊发明，最早只是蟹加番茄酱炒，后来才加进辣椒和蛋花。Jumbo Seafood 1987 年在东海岸海鲜中心开业。吃法：炸馒头蘸满酱汁。"
+ ],
+ [
+  "Chin Mee Chin",
+  "这类咖啡饼店是海南人的传统：海南移民早年在英国人家里做厨师和管家，学会了西式烘焙，后来自己开咖啡店，所以才有咖椰吐司、奶油角和蛋糕。加东（Katong）以前临海，是土生华人和欧亚混血家庭聚居的地方。"
+ ],
+ [
+  "Koon Seng",
+  "如切（Joo Chiat）得名于地主 Chew Joo Chiat（1857–1926）。Koon Seng Road 这排彩色联排屋是 20 世纪初到战前的建筑，保留了典型的娘惹元素：灰泥花饰、彩色花砖、双开木门（pintu pagar）和前面的“五脚基”走廊。"
+ ],
+ [
+  "Peranakan Mansion",
+  "Peranakan 指早年到东南亚经商的华人与当地女子通婚后留下的后代：男性叫 Baba（峇峇），女性叫 Nyonya（娘惹），说混合了闽南语的马来语。这座博物馆在一栋 1928 年的店屋里，展出家具、布料、瓷器和首饰，能看到中国、马来和欧洲三种风格混在一起。"
+ ],
+ [
+  "老机场路食阁",
+  "老机场路因旧的加冷机场（Kallang Airport）得名：1937 年启用，是新加坡第一个民用机场，1955 年被巴耶利巴机场取代。食阁（hawker centre）是 1970 年代政府把路边小贩迁进统一场所的产物，这里 1973 年开始营业。2020 年，新加坡的小贩文化被列入联合国教科文组织人类非物质文化遗产名录。"
+ ],
+ [
+  "榴莲街",
+  "新加坡人叫榴莲“水果之王”，本地卖的榴莲多数从马来西亚进口。Geylang（芽笼）这个名字一般认为和这一带早年种香茅（serai）有关，旁边的 Geylang Serai 至今是马来社区的中心。老说法：榴莲“热气”，吃完要配“凉”的山竹；酒店和地铁都禁止带榴莲。"
+ ],
+ [
+  "去甘榜格南",
+  "甘榜格南（Kampong Glam）曾是马来王室区：1819 年莱佛士与胡先苏丹订约，1822 年的城市规划把这一片划给苏丹和族人居住。“Gelam”据说来自一种白千层树，树皮曾用来堵船缝。后来这里成了阿拉伯商人和穆斯林朝圣者聚居的地方。"
+ ],
+ [
+  "哈芝巷",
+  "哈芝巷（Haji Lane）是甘榜格南最窄的一条小巷，两边是 20 世纪初的联排店屋，早年是阿拉伯、马来商人的杂货铺和小旅馆；名字常被认为和去麦加朝圣的“哈芝”（haji）有关，说法不一。现在多是设计小店、古着和壁画。"
+ ],
+ [
+  "Bussorah",
+  "Bussorah Street 的名字来自伊拉克的巴士拉（Basra），与阿拉伯商人的渊源有关。苏丹回教堂（Masjid Sultan）现在的建筑 1932 年完工，由建筑师 Denis Santry 设计；金色圆顶的底部据说嵌着穷穆斯林捐出的玻璃瓶底。"
+ ],
+ [
+  "Selegie",
+  "Selegie Arts Centre 的大楼原本是一家印度咖啡店，楼上住人；1994 年被列为保护建筑，后来由国家艺术理事会改成艺术空间，1996 年 11 月启用，最早供新加坡摄影学会使用。外墙鲜艳的配色是它的标志。"
+ ],
+ [
+  "翡翠山历史保护区",
+  "Emerald Hill 一带原是 19 世纪的肉豆蔻种植园，Cuppage Road 的名字据记载来自当年的种植园主 William Cuppage。20 世纪初，富有的土生华人在山上盖起一排排联排洋楼，1989 年被划为保护区。路口的 Peranakan Place 是这一带最显眼的一组。"
+ ],
+ [
+  "National Kitchen",
+  "这家餐厅所在的国家美术馆由两栋建筑合并而成：1929 年建成的旧市政厅（City Hall）和 1939 年建成的旧最高法院，2015 年改成美术馆。1945 年 9 月，日军在市政厅的大厅向盟军正式投降。餐厅的 Violet Oon 是新加坡美食作家，以娘惹菜闻名。"
+ ],
+ [
+  "Old Hill Street",
+  "Old Hill Street Police Station 1934 年建成，曾是警察总部，在当时是新加坡最大的政府大楼之一。立面上九百多扇窗被涂成彩虹色，现在是政府部门的办公楼，只能在外面拍照。"
+ ],
+ [
+  "福康宁公园",
+  "福康宁山（Fort Canning）古称“禁山”（Bukit Larangan），传说 14 世纪的马来王曾居住于此。1822 年莱佛士在山顶盖了住所，还开辟了新加坡第一个实验植物园；1859 年建炮台，以印度总督坎宁子爵命名。1942 年二战时，山下“Battle Box”地下指挥部是英军决定投降的地方。"
+ ],
+ [
+  "土生华人博物馆",
+  "博物馆所在的大楼 20 世纪初是道南学校（Tao Nan School），新加坡最早的华文学校之一，由福建人创办。博物馆 2023 年改造后重新开放，收藏峇峇娘惹的婚礼、服饰、珠绣和金饰，很多物件把中国的图案、马来的做法和欧洲的瓷器混在一起。"
+ ],
+ [
+  "HolyCrab",
+  "HolyCrab 所在的 Capitol Singapore，老 Capitol 戏院 1930 年开幕，是装饰艺术风格的老戏院，2015 年修复后改成商场和酒店。吃螃蟹戴一次性手套直接手抓，是本地人的吃法。"
+ ],
+ [
+  "国家博物馆",
+  "新加坡最老的博物馆，前身是 1849 年的莱佛士图书馆与博物馆；现在的新古典主义建筑和圆顶 1887 年落成，1965 年改称国家博物馆。展厅从渔村讲到港口城市，包括日据时期的展览。"
+ ],
+ [
+  "Kopi House",
+  "“Kopi”是马来语“咖啡”，tiam 是福建话“店”，kopitiam 就是咖啡店。点单暗语：Kopi = 加炼乳和糖；Kopi O = 黑咖啡加糖；Kopi C = 加淡奶和糖；Kopi Kosong = 有奶无糖；Kopi O Kosong = 黑咖啡不加糖；Siew Dai = 少糖；Gao = 浓；Po = 淡。"
+ ],
+ [
+  "Night Safari",
+  "夜间动物园 1994 年开放，是世界上第一个夜间动物园，里面以夜行动物为主，用低亮度的灯光模拟月光。园内禁止闪光灯，会打扰动物。"
+ ],
+ [
+  "Tong Ah",
+  "东亚餐室（Tong Ah Eating House）1939 年开在 Keong Saik Road，以炭烤吐司和半熟蛋出名。Keong Saik Road 在 20 世纪前半叶是红灯区，后来整条街的店屋被翻新，变成精品酒店和餐厅。"
+ ],
+ [
+  "Tong Mern Sern",
+  "Tong Mern Sern 所在的 Craig Road 属于丹绒巴葛（Tanjong Pagar）保护区。店屋（shophouse）是新加坡最典型的老建筑：楼下做生意、楼上住人，前面有顶的“五脚基”（five-foot way）是莱佛士 1822 年城市规划规定的遮阳避雨走廊。"
+ ],
+ [
+  "BabyFang",
+  "Tras Link 一带属于丹绒巴葛。“Tanjong Pagar”在马来语里大意是“木桩岬”，据说和早年沿岸插着捕鱼的木桩有关。"
+ ],
+ [
+  "佛牙寺",
+  "佛牙寺 2007 年开放，仿唐代风格，供奉一枚被寺方称为佛牙舍利的圣物，据寺方说是 1980 年前后在缅甸一座倒塌的佛塔中发现的。进寺要遮住肩膀和膝盖。"
+ ],
+ [
+  "Tai Chong Kok",
+  "Sago Street（西米街）得名于以前这一带的西米（sago）加工厂。Sago Lane 的老名字叫“死人街”：20 世纪上半叶，街上有给临终老人住的“死人屋”，如今早已拆掉。"
+ ],
+ [
+  "Chinatown Market Wall",
+  "这组壁画的作者 Yip Yew Chong（叶耀聪）是新加坡艺术家，用怀旧的画风把老牛车水的日常——菜市场、理发摊、木屐匠——画在店屋外墙上，让人站进画面里拍照。牛车水的名字来自马来语 Kreta Ayer，意思是“水车”——早年这一带没有自来水，用牛车运水来卖。1822 年莱佛士的城市规划把新加坡河南岸划给华人居住，牛车水逐渐成为华人社区的中心。"
+ ],
+ [
+  "鱼尾狮",
+  "鱼尾狮是 1964 年为新加坡旅游局设计的标志，设计者是 Alec Fraser-Brunner。狮头来自“Singapura（狮城）”的传说——14 世纪的王子 Sang Nila Utama 在岛上见到一头狮子；鱼身代表这里原本是叫 Temasek（淡马锡）的渔村。公园里的石像 1972 年由李光耀揭幕，2002 年迁到现在的位置。"
+ ],
+ [
+  "滨海湾花园",
+  "滨海湾花园 2012 年开放，建在填海土地上，是新加坡“花园中的城市”政策的代表作。擎天大树（Supertree）高 25–50 米，表面爬满植物，顶上装着太阳能板，有的还负责给旁边的温室排气降温。OCBC 空中走廊离地约 22 米。"
+ ],
+ [
+  "Garden Rhapsody",
+  "Garden Rhapsody 是在 Supertree Grove 每晚固定场次的灯光音乐秀，灯光随着音乐变化，每场十几分钟。可以躺在草地或空地上仰头看。"
+ ],
+ [
+  "Bafu",
+  "榴莲鸡锅是近年在新加坡和马来西亚流行起来的吃法：把榴莲果肉煮进鸡汤，汤带着榴莲的甜和奶香。冷知识：滨海艺术中心（Esplanade）圆圆带刺的屋顶，本地人叫它“大榴莲”。"
+ ],
+ [
+  "去樟宜机场",
+  "樟宜机场多次被评为世界最佳机场之一。T1 是最早的航站楼，1981 年启用；Jewel 就盖在它前面，两者有连廊相通。"
+ ],
+ [
+  "雨漩涡",
+  "星耀樟宜（Jewel）2019 年 4 月开放，由 Safdie Architects 设计，盖在 T1 前面原来的露天停车场上。40 米高的 HSBC 雨漩涡（Rain Vortex）常被称为世界最高的室内瀑布，旁边的森林谷种满了树木和灌木。"
+ ],
+ [
+  "抵达曼谷素万那普",
+  "素万那普机场 2006 年 9 月启用，取代廊曼机场成为曼谷的主要国际机场。“Suvarnabhumi”是泰语“黄金之地”，由已故的普密蓬国王赐名。"
+ ],
+ [
+  "安凡尼",
+  "酒店在湄南河（Chao Phraya）边，这条河常被译为“王者之河”，是曼谷的命脉：18 世纪末曼谷建都时，城市就沿着河发展，河上的渡船和长尾船至今还在运人。"
+ ],
+ [
+  "ICONSIAM",
+  "ICONSIAM 2018 年底在湄南河边开业，是曼谷的大型滨水商场。里面的 SOOKSIAM 是室内水上市场，仿造泰国各地的传统市场和水上生活，可以集中吃到各地小吃。"
+ ],
+ [
+  "丹嫩沙多",
+  "丹嫩沙多运河是拉玛四世（Mongkut）在 1866 年下令开凿的，用来连通 Tha Chin 河与 Mae Klong 河。以前的水上市场是当地人买卖的日常，现在以游客为主，早上 9 点前人少一些。"
+ ],
+ [
+  "美功铁道",
+  "美功铁路市场（Talat Rom Hoop，“收伞市场”）的小贩把摊子搭在铁轨上，火车来时才收起遮阳棚让路，车过之后再支起。这条美功铁路是 20 世纪初的老铁路。"
+ ],
+ [
+  "班印轩",
+  "安帕瓦（Amphawa）是泰国国王拉玛二世的出生地，运河边保留着不少木屋。住在这里的好处是傍晚游客散去后，运河一带很安静，早晨能看到水边的日常生活。"
+ ],
+ [
+  "安帕瓦水上市场",
+  "安帕瓦水上市场只在周五到周日的下午和晚上热闹，小贩在船上烧烤海鲜、卖糕点。安帕瓦本身是个有两百多年历史的运河小镇，拉玛二世（1767–1824）出生在这里。"
+ ],
+ [
+  "萤火虫",
+  "安帕瓦运河边长着一种叫 lamphu 的植物（海桑），夜里成群的萤火虫停在树上一起闪光。萤火虫怕光和噪音，船上请关闪光灯、手电和手机屏幕；月亮太亮的夜晚看得少。"
+ ],
+ [
+  "河边散步",
+  "湄南河在泰国人心里是母亲河，古时的城市和皇宫都沿河而建。清晨河边是看当地生活的好时间：渡船、早市和给僧人布施的人。"
+ ],
+ [
+  "玛哈泰寺",
+  "大城（Ayutthaya）由 U Thong（Ramathibodi 一世）约 1350 年建都，1767 年被缅甸军队攻陷。Wat Mahathat 是当时的重要王家寺院，树根缠住的佛头是这里最有名的景象。"
+ ],
+ [
+  "柴瓦塔那兰寺",
+  "Wat Chaiwatthanaram 是 1630 年国王 Prasat Thong 为纪念母亲所建，中央的高塔（prang）模仿柬埔寨吴哥的风格，四周有小塔环绕。1767 年大城陷落时遭到破坏，后来修复。傍晚夕阳照在红褐色的砖石上最好看。"
+ ],
+ [
+  "大城古迹清晨游",
+  "大城全盛时期是东南亚最繁华的城市之一，有许多国家的商人往来，1991 年和周围遗迹一起被列入联合国教科文组织世界遗产。遗址里的红砖佛塔和佛像在 1767 年被缅甸军队洗劫焚毁，很多佛像至今缺头少手。"
+ ],
+ [
+  "入住诺富特",
+  "暹罗（Siam）是泰国 1939 年之前的国名，1939 年改名 Thailand，1945–1949 年又短暂改回 Siam。“暹罗广场”一带因此得名，是曼谷最热闹的商圈。"
+ ],
+ [
+  "恰图恰",
+  "恰图恰周末市场的前身 1940 年代在别处开设，1982 年搬到现址，现在有一万五千个左右的摊位，分成二十七个区。名字来自旁边的恰图恰公园。"
+ ],
+ [
+  "暹罗商圈",
+  "Siam Square 一带的商业街区兴起于 1960 年代，土地属于朱拉隆功大学，是曼谷最早规划的商圈之一，周围商场、电影院和年轻人的小店很集中。"
+ ],
+ [
+  "大皇宫",
+  "大皇宫 1782 年由拉玛一世建造，当年他把首都从湄南河西岸的吞武里迁到东岸的 Rattanakosin。玉佛寺（Wat Phra Kaew）供着用整块翠玉雕成的玉佛，国王每年换三次衣服，对应热季、雨季、凉季。进去要遮住肩膀和膝盖。"
+ ],
+ [
+  "卧佛寺",
+  "Wat Pho 比曼谷建都还早，是曼谷最古老的佛寺之一，卧佛长约 46 米，佛脚底镶着 108 个吉祥图案，用珍珠母贝嵌成。这里也是泰式按摩学校的发源地，寺里有刻着穴位和草药的石碑。"
+ ],
+ [
+  "郑王庙",
+  "郑王庙（Wat Arun）意为“黎明寺”，名字取自印度的黎明神 Aruna。中央的大塔（prang）高约 70–80 米，用瓷片和贝壳贴成花纹，据说那些瓷片是早年中国商船压舱的碎瓷器。登塔的台阶很陡。"
+ ],
+ [
+  "耀华力",
+  "耀华力路（Yaowarat）是曼谷唐人街的主街，华人在 1782 年曼谷建都时被迁到这一带，这条路本身是拉玛五世时期、19 世纪末修的。这里的华人以潮州人为主，夜里整条街摆满小吃摊。"
+ ],
+ [
+  "Big C",
+  "Ratchadamri（拉差达姆里）大意是“王室行进之路”，这条路从暹罗商圈通向王室所在的 Dusit 一带。"
+ ]
+];
+const loreFor = p => { for (const [k,t] of LORE) if ((p.n||'').includes(k)) return t; return ''; };
+
+const FOOD = {
+  sg: [
+    {cat:"food", n:"天天海南鸡饭", en:"Tian Tian Hainanese Chicken Rice", lat:1.2803, lon:103.8448, d:"麦士威熟食中心里，排队名店"},
+    {cat:"food", n:"老巴刹沙爹街", en:"Lau Pa Sat Satay Street", lat:1.2806, lon:103.8504, d:"傍晚封街开烤，沙爹配啤酒"},
+    {cat:"food", n:"松发肉骨茶", en:"Song Fa Bak Kut Teh New Bridge Road", lat:1.2890, lon:103.8467, d:"胡椒味肉骨茶，可以续汤"},
+    {cat:"food", n:"珍宝海鲜 辣椒螃蟹", en:"JUMBO Seafood Riverside Point", lat:1.2899, lon:103.8455, d:"辣椒蟹 + 炸馒头，适合一群人"},
+    {cat:"food", n:"328 加东叻沙", en:"328 Katong Laksa", lat:1.3054, lon:103.9046, d:"椰浆浓郁，用勺子吃的叻沙"},
+    {cat:"food", n:"旧机场路熟食中心", en:"Old Airport Road Food Centre", lat:1.3080, lon:103.8856, d:"本地人常去的大型熟食中心"},
+    {cat:"coffee", n:"亚坤咖椰吐司", en:"Ya Kun Kaya Toast", chain:true, d:"Kopi + 咖椰吐司 + 半熟蛋"},
+    {cat:"coffee", n:"Tiong Bahru Bakery", en:"Tiong Bahru Bakery", lat:1.2846, lon:103.8318, d:"中峇鲁老社区里的面包咖啡"},
+    {cat:"coffee", n:"Chye Seng Huat Hardware", en:"Chye Seng Huat Hardware", lat:1.3110, lon:103.8604, d:"五金行改造的精品咖啡馆"},
+    {cat:"coffee", n:"Bacha Coffee", en:"Bacha Coffee ION Orchard", lat:1.3040, lon:103.8318, d:"摩洛哥风装修，也是热门伴手礼"},
+    {cat:"drink", n:"LiHO 里喝", en:"LiHO TEA", chain:true, d:"本地连锁奶茶，芝士奶盖系列"},
+    {cat:"drink", n:"KOI", en:"KOI The", chain:true, d:"黄金珍珠奶茶"},
+    {cat:"drink", n:"Mr Coconut", en:"Mr Coconut", chain:true, d:"椰子奶昔，热天必备"},
+    {cat:"dessert", n:"Kim Choo 娘惹糕点", en:"Kim Choo Kueh Chang 60 Joo Chiat Place", lat:1.3118, lon:103.9027, d:"如切老字号，每天 9:00–21:00；综合娘惹糕一盒约 S$3.2，有 ondeh ondeh、红龟粿、kueh ambon，颜色最多"},
+    {cat:"dessert", n:"Xing Xing 木薯糕 / 椰丝球", en:"Xing Xing Ondeh-Ondeh Tapioca Cake Maxwell Food Centre", lat:1.2803, lon:103.8448, d:"麦士威熟食中心，周一至周六 7:00–13:00；木薯糕、椰丝糯米球每个约 S$0.7，午后会卖完"},
+    {cat:"dessert", n:"Kueh Ho Jiak", en:"Kueh Ho Jiak Tanjong Pagar Plaza #02-20", lat:1.2766, lon:103.8433, d:"丹绒巴葛广场二楼，周一至三、五、六 7:30–14:00；榴莲红薯红龟粿拼盘（约 S$18）、班兰 kueh salat，离牛车水不远"},
+    {cat:"dessert", n:"Nyonya Bites", en:"Nyonya Bites Golden Mile Food Centre 505 Beach Rd #01-93", lat:1.3030, lon:103.8646, d:"黄金坊熟食中心，每天 10:00–17:00；蝶豆花蓝色糕、红龟粿，离哈芝巷不远，要在 17:00 前到"},
+    {cat:"dessert", n:"阿秋甜品", en:"Ah Chew Desserts", lat:1.2970, lon:103.8556, d:"武吉士附近的糖水铺"}
+  ],
+  bkk: [
+    {cat:"food", n:"Jay Fai 痣姐", en:"Jay Fai", lat:13.7527, lon:100.5047, d:"米其林星级蟹肉煎蛋卷，要提前排队或预约"},
+    {cat:"food", n:"Thipsamai 鬼门炒河", en:"Thipsamai Pad Thai", lat:13.7527, lon:100.5049, d:"蛋包泰式炒河粉，和痣姐在同一条街"},
+    {cat:"food", n:"Wattana Panich 老汤牛肉面", en:"Wattana Panich", lat:13.7392, lon:100.5868, d:"熬了几十年的老汤锅"},
+    {cat:"food", n:"Som Tam Der", en:"Som Tam Der Sala Daeng", lat:13.7270, lon:100.5340, d:"东北菜：青木瓜沙拉、烤鸡"},
+    {cat:"food", n:"Nai Ek 粿条", en:"Nai Ek Roll Noodles", lat:13.7410, lon:100.5085, d:"唐人街胡椒卷粉汤"},
+    {cat:"food", n:"T&K 海鲜", en:"T&K Seafood Yaowarat", lat:13.7400, lon:100.5098, d:"耀华力绿衣海鲜大排档"},
+    {cat:"dessert", n:"Mae Varee 芒果糯米饭", en:"Mae Varee Thonglor", lat:13.7238, lon:100.5784, d:"芒果糯米饭外带名店"},
+    {cat:"dessert", n:"After You", en:"After You Dessert Cafe", chain:true, d:"泰奶刨冰、蜜糖吐司"},
+    {cat:"coffee", n:"Roots Coffee", en:"Roots Coffee Bangkok", chain:true, d:"曼谷本地精品咖啡"},
+    {cat:"coffee", n:"Factory Coffee", en:"Factory Coffee Bangkok", lat:13.7565, lon:100.5335, d:"冠军咖啡师的店，创意特调"},
+    {cat:"drink", n:"ChaTraMue 手标泰奶", en:"ChaTraMue", chain:true, d:"正宗泰式奶茶，橙色那杯"},
+    {cat:"drink", n:"椰子冰淇淋", en:"coconut ice cream Chatuchak", lat:13.7999, lon:100.5500, d:"恰图恰市场里，椰壳装"}
+  ]
+};
+
+const SHOP = {
+  sg: [
+    {n:"Bengawan Solo 糕点 / 凤梨挞", w:"樟宜机场、各大商场", d:"娘惹糕、凤梨挞，送人体面"},
+    {n:"Irvin's 咸蛋鱼皮", w:"樟宜机场、ION Orchard", d:"人气第一的零食伴手礼"},
+    {n:"Bacha Coffee 咖啡", w:"ION Orchard、樟宜机场", d:"包装好看，有挂耳"},
+    {n:"TWG 茶叶", w:"滨海湾金沙、ION、机场", d:"马卡龙色茶罐"},
+    {n:"咖椰酱 Kaya", w:"亚坤、Killiney、超市", d:"抹吐司的椰子蛋酱，液体要托运"},
+    {n:"娘惹珠绣鞋 / 娘惹瓷", w:"如切 Kim Choo、牛车水", d:"最有南洋味的纪念品"},
+    {n:"虎标万金油", w:"慕斯达法、屈臣氏", d:"送长辈经典款"},
+    {n:"Charles & Keith / Pedro", w:"乌节路、各大商场", d:"本土品牌鞋包"}
+  ],
+  bkk: [
+    {n:"NaRaYa 曼谷包", w:"Central World、ICONSIAM", d:"布艺包、零钱包，价格友好"},
+    {n:"手标泰茶茶粉", w:"Big C、7-Eleven", d:"回家自己做泰奶"},
+    {n:"芒果干", w:"Big C、机场、市场", d:"量大好分"},
+    {n:"小老板海苔", w:"7-Eleven、Big C", d:"各种口味"},
+    {n:"青草药膏 / 鼻通", w:"7-Eleven、药妆店", d:"防蚊止痒、提神"},
+    {n:"Karmakamet 香氛", w:"Siam Paragon、Central", d:"复古药铺风香薰"},
+    {n:"Jim Thompson 丝巾", w:"Jim Thompson 店、机场", d:"泰丝，适合送重要的人"},
+    {n:"MAMA 泡面", w:"7-Eleven、Big C", d:"冬阴功口味必带"}
+  ]
+};
+
+const TIPS = {
+  sg: {
+    cur:"SGD", curName:"新币",
+    sections:[
+      ["bus","交通",[
+        "<b>地铁 MRT</b>：可以直接用带感应功能的 Visa / Mastercard 刷闸",
+        "<b>打车</b>：Grab、Gojek 都好用",
+        "地铁和公交里<b>禁止饮食</b>，榴莲不能带上车"]],
+      ["card","付款与小费",[
+        "大部分地方能刷卡，不少店也收支付宝 / 微信",
+        "小贩中心有些摊位只收现金，备一点零钱",
+        "一般<b>不用给小费</b>，餐厅账单常已含服务费和消费税"]],
+      ["plug","电源",["英标三方脚插座（和香港一样），电压 230V"]],
+      ["bed","住在克拉码头",[
+        "酒店对面商场地下就是 <b>Clarke Quay 站</b>（紫色东北线），Chinatown、Little India、Farrer Park（慕斯达法）、HarbourFront（圣淘沙）都<b>不用换乘</b>",
+        "河边夜晚很热闹，想睡得安静就要<b>高楼层、背河的房间</b>",
+        "新加坡和北京<b>同一时区</b>，没有时差；11 月是雨季，包里放把折叠伞"]],
+      ["card","榴莲、动物园、预约提醒",[
+        "<b>榴莲街</b>在 Geylang Road（靠 Lorong 36 路口），11/23 下午 14:45 去；11–12 月是小季，价格和品种看当天",
+        "<b>榴莲不能带进酒店和地铁</b>，就在摊边吃；夜里只在大路沿线摊位，不要拐进小巷",
+        "<b>夜间动物园</b>要在官网选场次（19:15 / 20:15 / 21:15 / 22:15），提前 2–5 天买；回程晚上叫车要预留时间",
+        "<b>需要提前预约的</b>：Peranakan Mansion 导览、National Kitchen 晚饭位置、Bumboat 船票、Jumbo 位置、HolyCrab 位置、夜间动物园门票、Bafu 火锅位置"]],
+      ["alert","注意事项",[
+        "<b>电子烟违法</b>，带入或使用都会被重罚",
+        "乱丢垃圾、吐痰会罚款",
+        "小贩中心用纸巾放在座位上表示有人占座（本地人叫 chope）"]],
+      ["receipt","购物退税",["同一家店单次消费满一定金额可以退消费税，结账时出示护照要退税凭证，离境前在樟宜机场自助办理"]],
+      ["passport","入境提醒",["抵达前 3 天内在线填 SG Arrival Card","中国护照目前互免签证，出发前再确认最新政策"]]
+    ],
+    phrases:{ title:"南洋咖啡店点单暗号", rows:[
+      ["咖啡 + 炼奶 + 糖","Kopi"],["黑咖啡加糖","Kopi O"],["淡奶加糖","Kopi C"],
+      ["无糖","…Kosong"],["加冰","…Peng"],["奶茶","Teh（规则同上）"],["打包","Tapau 打包"]]}
+  },
+  bkk: {
+    cur:"THB", curName:"泰铢",
+    sections:[
+      ["bus","交通",[
+        "<b>BTS 轻轨 / MRT 地铁</b>：避开堵车最靠谱",
+        "<b>打车</b>：Grab、Bolt；路边出租车坚持打表",
+        "<b>突突车</b>上车前先谈好价钱",
+        "去大皇宫、郑王庙可以坐<b>昭披耶河快船</b>"]],
+      ["card","付款与小费",[
+        "市场、街边摊多数只收现金，多换点零钱",
+        "7-Eleven、商场可以刷卡",
+        "按摩一般给 50–100 泰铢小费，餐厅可留零头"]],
+      ["plug","电源",["多数插座是两孔扁圆通用口，国内两脚扁插通常能直接用，电压 220V"]],
+      ["bed","5 晚 4 个住处怎么搬",[
+        "路线：<b>河畔安凡尼（1 晚）→ 安帕瓦（1 晚）→ 大城（1 晚）→ 暹罗广场诺富特（2 晚）</b>",
+        "11/27–11/29 这三天<b>包一辆带司机的车</b>最省事，大行李箱一直放车上",
+        "安帕瓦和大城各只住 1 晚，随身<b>小包装两晚用的东西</b>：换洗衣物、洗漱、充电器、驱蚊液",
+        "包车出发前和司机确认：时间、路线（水上市场 → 美功 → 安帕瓦 → 大城 → 暹罗）、含不含过路费和油费"]],
+      ["card","去安帕瓦、大城前先备钱",[
+        "这两个地方的小摊、船、寺庙门票<b>多数只收现金</b>，先在曼谷换好或取好泰铢，带够小面额",
+        "外国银行卡在泰国 ATM 取钱每笔有手续费，<b>一次多取一点</b>比多次少取划算",
+        "安帕瓦水上市场多在<b>周五到周日</b>营业，你们 11/27、11/28 刚好；平日很多店不开"]],
+      ["alert","注意事项",[
+        "<b>尊重王室</b>，不要议论或开玩笑",
+        "不要摸别人的头；进寺庙脱鞋，遮肩穿过膝下装",
+        "女生不要触碰僧侣",
+        "<b>电子烟违法</b>，不要携带",
+        "景点附近有人说「今天关门，带你去别处」，多半是骗局",
+        "<b>大城古迹</b>别爬遗迹、别摸佛像，拍照时人的头不要高过佛头；多数 18:00 前后关门",
+        "安帕瓦河边夜里蚊子多，驱蚊液必带；11–12 月是曼谷的凉季，白天仍有 30°C 以上，注意防晒"]],
+      ["receipt","购物退税",["贴有 VAT Refund 标志的商店，单店满一定金额可以开退税单，离境前在机场海关盖章、办理退税"]],
+      ["passport","入境提醒",["抵达前 3 天内在线填 TDAC 电子入境卡","中国护照目前互免签证，出发前再确认最新政策"]]
+    ],
+    phrases:{ title:"泰语救急（女生句尾说「卡」，男生说「卡普」）", rows:[
+      ["你好","萨瓦迪卡<small>sa-wat-dee ka</small>"],["谢谢","扩坤卡<small>khop-khun ka</small>"],
+      ["多少钱？","套莱<small>tao-rai</small>"],["便宜点可以吗？","落内呆卖<small>lot noi dai mai</small>"],
+      ["不要辣","买啤<small>mai phet</small>"],["一点点辣","啤尼脑<small>phet nit noi</small>"],
+      ["厕所在哪？","烘南有替乃<small>hong nam yoo tee nai</small>"],["买单","嗯冰<small>check bin</small>"]]}
+  }
+};
+/* ======================== 设置结束 ======================== */
+
+/* ---------- 手绘图标 ---------- */
+const ICONS = {
+  sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',
+  map:'<path d="M3 6.5l5.5-2.3 7 2.6 5.5-2.3v13.3l-5.5 2.3-7-2.6L3 19.8z"/><path d="M8.5 4.2v13.3M15.5 6.8v13.3"/>',
+  pin:'<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+  check:'<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M7.5 12.3l3 3 6-6.5"/>',
+  news:'<path d="M4 5h13v14H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v8a2 2 0 0 1-2 2"/><path d="M7.5 8.5h6M7.5 12h6M7.5 15.5h4"/>',
+  note:'<path d="M5 3.5h10l4 4v13H5z"/><path d="M15 3.5v4h4M8.5 12h7M8.5 15.5h5"/>',
+  coin:'<circle cx="9" cy="9" r="5.5"/><path d="M14.6 9.6A5.5 5.5 0 1 1 9.6 14.6"/><path d="M9 6.5v5M7.2 7.8h3.4"/>',
+  bus:'<rect x="4.5" y="3.5" width="15" height="14" rx="3"/><path d="M4.5 11h15M8 20.5v-3M16 20.5v-3"/><circle cx="8.3" cy="14.3" r=".9"/><circle cx="15.7" cy="14.3" r=".9"/>',
+  card:'<rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 9.8h19M6 15h4"/>',
+  plug:'<path d="M8.5 3v5M15.5 3v5"/><path d="M6 8h12v3.5a6 6 0 0 1-12 0z"/><path d="M12 17.5V21"/>',
+  alert:'<path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2v.2"/>',
+  passport:'<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10.5" r="3.2"/><path d="M8.5 17h7"/>',
+  chat:'<path d="M4 5h16v11H9.5L5 20v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  phone:'<path d="M6.5 3.5l3 .5 1.3 4-2 1.5a12 12 0 0 0 5.7 5.7l1.5-2 4 1.3.5 3a2 2 0 0 1-2.2 2.2A17 17 0 0 1 4.3 5.7a2 2 0 0 1 2.2-2.2z"/>',
+  bowl:'<path d="M3.5 11h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 8c0-1.5 1.5-1.5 1.5-3M12 8c0-1.5 1.5-1.5 1.5-3M16 8c0-1.5 1.5-1.5 1.5-3"/>',
+  bag:'<path d="M5 8h14l-1.2 13H6.2z"/><path d="M9 10.5V7a3 3 0 0 1 6 0v3.5"/>',
+  compass:'<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  wallet:'<path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1z"/><path d="M4 7l11-3v3"/><path d="M15.5 13.5h4.5"/><circle cx="16.5" cy="13.5" r=".6"/>',
+  plane:'<path d="M2.5 13.5l7-1.5 5-8h2l-2 8.5 5.5.5 1.5-2.5h1.5l-1 4 1 4h-1.5l-1.5-2.5-5.5.5 2 8.5h-2l-5-8-7-1.5z" transform="scale(.92) translate(1 -1.5)"/>',
+  bed:'<path d="M3 18.5V6M3 14h18v4.5M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/>',
+  receipt:'<path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 21z"/><path d="M9 8h6M9 11.5h6M9 15h4"/>',
+  suitcase:'<rect x="4" y="7" width="16" height="13" rx="2.5"/><path d="M9 7V4.5h6V7M9 11v5M15 11v5"/>',
+  walk:'<circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2-6 3 2.5V21M9 11l2.5-3.5 3 2 2.5 1.5M11.5 7.5L10 13"/>',
+  bulb:'<path d="M9 17h6M10 20.5h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
+  flower:'<g transform="translate(12 12)"><path d="M0 0C-3-2-3.5-7-1-8.5 1.5-9 3.5-6.5 2.3-3.5z"/><path transform="rotate(72)" d="M0 0C-3-2-3.5-7-1-8.5 1.5-9 3.5-6.5 2.3-3.5z"/><path transform="rotate(144)" d="M0 0C-3-2-3.5-7-1-8.5 1.5-9 3.5-6.5 2.3-3.5z"/><path transform="rotate(216)" d="M0 0C-3-2-3.5-7-1-8.5 1.5-9 3.5-6.5 2.3-3.5z"/><path transform="rotate(288)" d="M0 0C-3-2-3.5-7-1-8.5 1.5-9 3.5-6.5 2.3-3.5z"/></g>'
+};
+const icon = (name, cls) => `<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter:url(#rough)">${ICONS[name]||""}</svg>`;
+function fillIcons(root){ (root||document).querySelectorAll("[data-ic]").forEach(el => { el.outerHTML = icon(el.dataset.ic); }); }
+
+/* ---------- 南洋骑楼 ---------- */
+(function drawShophouses(){
+  const cols = ["#d6e5d6","#f0e4c9","#cfe1dd","#efd8cf","#e2e6c4"];
+  const shutter = ["#4f8571","#6fa8a2","#4f8571","#7a9a6a","#6fa8a2"];
+  const gables = [
+    'M2 26H18Q22 13 33 13Q44 3 55 13Q66 13 70 26H86',
+    'M2 26V18H86V26M28 18L44 7L60 18',
+    'M2 26V17H18V10H70V17H86V26',
+    'M2 26H14Q20 8 44 8Q68 8 74 26H86',
+    'M2 26V18H86V26M34 18Q44 5 54 18'
+  ];
+  let g = "";
+  for (let i = 0; i < 5; i++){
+    const c = cols[i], sh = shutter[i];
+    let slats = "";
+    [34,40,46,52].forEach(y => { slats += `M17 ${y}h12M59 ${y}h12`; });
+    let tiles = "";
+    for (let x = 8; x < 84; x += 9) tiles += `<path d="M${x} 61l3-3 3 3-3 3z" fill="${(x/9)%2<1?'#d99c94':'#9dbba7'}"/>`;
+    const lantern = i % 2 === 0 ? `<path d="M24 70v4M64 70v4" fill="none"/><ellipse cx="24" cy="78" rx="4" ry="4.8" fill="#d99c94"/><ellipse cx="64" cy="78" rx="4" ry="4.8" fill="#d99c94"/>` : "";
+    const plant = `<path d="M5 96v-5h7v5z" fill="#c07e62"/><path d="M8.5 91c-4-3-5-8-3-9 2 2 3 5 3 9 0-4 2-8 5-9 1 2-1 6-5 9" fill="#9dbba7"/>`;
+    g += `<g transform="translate(${i*88},0)">
+      <path d="${gables[i]}Z" fill="${c}"/><path d="${gables[i]}" fill="none"/>
+      <path d="M2 26h84v70H2z" fill="${c}"/>
+      <path d="M15 56V36a7 7 0 0 1 14 0v20zM57 56V36a7 7 0 0 1 14 0v20z" fill="${sh}" fill-opacity=".75"/>
+      <path d="${slats}M22 30v26M64 30v26" fill="none" stroke-width="1"/>
+      <circle cx="44" cy="38" r="4" fill="#cfa556"/><path d="M38 38h-3M50 38h3" fill="none"/>
+      <path d="M2 58h84M2 65h84" fill="none"/>${tiles}
+      <path d="M12 96V80a8 8 0 0 1 8-8h48a8 8 0 0 1 8 8v16" fill="#36604f" fill-opacity=".14"/>
+      <path d="M36 96V82h16v14zM44 82v14" fill="${sh}" fill-opacity=".55"/>
+      ${lantern}${plant}
+    </g>`;
+  }
+  document.getElementById("shophouses").innerHTML = `<g stroke="#2c3a33" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" filter="url(#rough)">${g}</g>`;
+})();
+
+/* ---------- 工具 ---------- */
+const WEEK = ["周日","周一","周二","周三","周四","周五","周六"];
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, def){ try { const v = localStorage.getItem("nanyang:" + k); return v == null ? def : JSON.parse(v); } catch(e){ return def; } },
+  set(k, v){ try { localStorage.setItem("nanyang:" + k, JSON.stringify(v)); } catch(e){} }
+};
+function ymdIn(tz){ return new Intl.DateTimeFormat("en-CA",{timeZone:tz,year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()); }
+function hmIn(tz){ return new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date()); }
+function mdwIn(tz){
+  const p = new Intl.DateTimeFormat("en-US",{timeZone:tz,month:"numeric",day:"numeric",weekday:"short"}).formatToParts(new Date());
+  const g = t => (p.find(x => x.type === t) || {}).value;
+  const wk = {Sun:"周日",Mon:"周一",Tue:"周二",Wed:"周三",Thu:"周四",Fri:"周五",Sat:"周六"}[g("weekday")];
+  return g("month") + "/" + g("day") + " " + wk;
+}
+function dayObj(date){ const [y,m,d] = date.split("-").map(Number); return new Date(Date.UTC(y, m-1, d)); }
+function fetchJSON(url, ms){
+  const ctl = ("AbortController" in window) ? new AbortController() : null;
+  const t = setTimeout(() => ctl && ctl.abort(), ms || 9000);
+  return fetch(url, ctl ? {signal:ctl.signal} : {}).then(r => { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); });
+}
+
+const state = { idx:0, tab:"home", foodCat:"all", myPos:null };
+const curDay = () => DAYS[state.idx];
+const tabCity = () => { const c = curDay().city; return c === "sz" ? "sg" : c; };
+
+/* ---------- 时间 ---------- */
+function renderClocks(){
+  const city = CITIES[curDay().city];
+  const rows = [[city.name + " · 当地", city.tz, "local"],["北京","Asia/Shanghai",""],["洛杉矶","America/Los_Angeles",""]];
+  $("#clocks").innerHTML = rows.map(r => `<div class="clock ${r[2]}"><small>${r[0]}</small><b>${hmIn(r[1])}</b><small>${mdwIn(r[1])}</small></div>`).join("");
+  const today = ymdIn("Asia/Shanghai");
+  const start = "2026-11-22", last = DAYS[DAYS.length-1].date;
+  let msg;
+  if (today < start){
+    const n = Math.round((dayObj(start) - dayObj(today)) / 86400000);
+    msg = n === 1 ? "✈ 明天就出发啦！" : `✈ 距离出发还有 <b>${n}</b> 天`;
+  } else if (today <= last){
+    msg = `✿ 旅途第 <b>${Math.round((dayObj(today) - dayObj(start)) / 86400000) + 1}</b> 天`;
+  } else msg = "旅程结束啦，记得整理照片";
+  $("#countdown").innerHTML = msg;
+}
+
+/* ---------- 日期条 ---------- */
+function renderDays(){
+  const today = ymdIn("Asia/Shanghai");
+  $("#days").innerHTML = DAYS.map((d,i) => {
+    const o = dayObj(d.date);
+    const tag = d.type === "prep" ? "准备" : CITIES[d.city].name;
+    return `<button class="chip rough ${i===state.idx?"on":""} ${d.date===today?"today":""}" data-i="${i}">
+      <div class="d">${o.getUTCMonth()+1}/${o.getUTCDate()}</div>
+      <div class="w">${WEEK[o.getUTCDay()]}</div>
+      <span class="c ${d.city}">${tag}</span></button>`;
+  }).join("");
+  $("#days").querySelectorAll(".chip").forEach(b => b.onclick = () => selectDay(+b.dataset.i));
+  const on = $("#days .chip.on"); if (on) on.scrollIntoView({inline:"center", block:"nearest"});
+}
+function selectDay(i){
+  state.idx = i;
+  renderDays(); renderClocks(); renderHome();
+  renderTab();
+}
+
+/* ---------- 导航链接 ---------- */
+function navBtns(p){
+  if (!p.en) return "";
+  let h = `<a class="btn g" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.en)}" target="_blank" rel="noopener">Google 地图</a>`;
+  if (p.lat != null && !p.chain){
+    h += `<a class="btn" href="https://maps.apple.com/?q=${encodeURIComponent(p.n)}&ll=${p.lat},${p.lon}" target="_blank" rel="noopener">Apple 地图</a>`;
+    h += `<a class="btn a" href="https://uri.amap.com/marker?position=${p.lon},${p.lat}&name=${encodeURIComponent(p.n)}&coordinate=wgs84&callnative=1" target="_blank" rel="noopener">高德</a>`;
+  }
+  return h;
+}
+function xhsBtn(name, city){
+  const pre = CITIES[city] && city !== "sz" ? CITIES[city].name + " " : "";
+  return `<a class="btn x" href="https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(pre + name)}" target="_blank" rel="noopener">小红书</a>`;
+}
+
+/* ---------- 登机牌 ---------- */
+function ticketHTML(f){
+  return `<div class="ticket">
+    <div class="city">${esc(f.from)}<small>${esc(f.fromCode)} · ${esc(f.fromT)}</small><b class="tt">${esc(f.dep)}</b></div>
+    <div class="mid">${icon("plane")}<div class="fno">${esc(f.no)}</div><div>${esc(f.dur)}</div></div>
+    <div class="city r">${esc(f.to)}<small>${esc(f.toCode)} · ${esc(f.toT)}</small><b class="tt">${esc(f.arr)}</b></div>
+    <div class="meta"><span>${esc(f.date)} · ${esc(f.air)}</span><span>${esc(f.note)}</span></div></div>`;
+}
+
+/* ---------- 今晚住哪 ---------- */
+function renderStay(day, prep){
+  const box = $("#stay");
+  const night = HOTELS.find(h => h.from <= day.date && day.date < h.to);
+  const out = HOTELS.find(h => h.to === day.date);
+  if (prep || (!night && !out)){ box.style.display = "none"; return; }
+  box.style.display = "";
+  const h = night || out, idx = HOTELS.indexOf(h);
+  const p = {en:h.en + " " + h.addr, n:h.name, lat:h.lat, lon:h.lon};
+  box.innerHTML = `<h3>${icon("bed")}${night ? "今晚住" : "今天退房"} <span class="tag">${esc(h.dates)}</span></h3>
+    <div><b>${esc(h.name)}</b> <small>${esc(h.place)}</small></div>
+    <div class="hint">${esc(h.room)} ｜ ${esc(h.addr)}</div>
+    ${out && night && out !== night ? `<div class="hint">早上先从「${esc(out.name)}」退房</div>` : ""}
+    <div class="hint">${esc(h.note)}</div>
+    <div class="btns">${navBtns(p)}<button class="btn solid" data-drv="${idx}">给司机看地址</button></div>`;
+  box.querySelector("[data-drv]").onclick = () => showDriver(idx);
+}
+
+/* ---------- 今日 ---------- */
+function renderHome(){
+  const day = curDay(), city = CITIES[day.city], o = dayObj(day.date);
+  const prep = day.type === "prep";
+  $("#dayHead").innerHTML = `<div class="no">${prep ? "D-1" : "D" + state.idx}</div><div>
+    <div class="t">${esc(day.title)}</div>
+    <div class="m">${o.getUTCMonth()+1} 月 ${o.getUTCDate()} 日 ${WEEK[o.getUTCDay()]} ｜ ${city.name}</div></div>`;
+
+  ["mapCard","itin","news"].forEach(id => $("#"+id).style.display = prep ? "none" : "");
+  renderStay(day, prep);
+  $("#prep").style.display = prep ? "" : "none";
+  $("#todo").style.display = prep ? "none" : "";
+
+  if (prep) renderPrep();
+  else {
+    let n = 0;
+    $("#itin").innerHTML = `<h3>${icon("pin")}今日行程 <span class="tag">绿 = 已定　橙 = 建议</span></h3>
+      <ul class="tl">${day.items.map(p => {
+        const has = p.lat != null; if (has) n++;
+        return `<li><div class="no ${p.s==="fixed"?"fixed":""} ${has?"":"none"} ${p.fl!=null?"flt":""}">${p.fl!=null?icon("plane"):has?n:"·"}</div>
+          <div><span class="time">${esc(p.t)}</span><span class="name">${esc(p.n)}</span>
+          <span class="badge ${p.s}">${p.s==="fixed"?"已定":"建议"}</span></div>
+          ${p.fl != null ? ticketHTML(FLIGHTS[p.fl]) : `<div class="d">${esc(p.d||"")}</div>`}
+          ${p.go ? `<div class="go">${icon("walk")}<span>${esc(p.go)}</span></div>` : ""}
+          ${p.tip ? `<div class="tip">${icon("bulb")}<span>${esc(p.tip)}</span></div>` : ""}
+          ${loreFor(p) ? `<details class="lore"><summary>✦ 历史 · 小知识</summary><p>${esc(loreFor(p))}</p></details>` : ""}
+          ${p.en ? `<div class="btns">${navBtns(p)}${xhsBtn(p.n, day.city)}</div>` : ""}</li>`;
+      }).join("")}</ul>`;
+    renderTodo(); renderMap(); renderNews();
+  }
+  renderWeather();
+
+  const nb = $("#notesBtn");
+  if (SHARED_NOTES_URL){ nb.href = SHARED_NOTES_URL; nb.innerHTML = `${icon("note")} 打开共享笔记<small>腾讯文档 · 大家一起写</small>`; }
+  else { nb.removeAttribute("href"); nb.innerHTML = `${icon("note")} 共享笔记（还没设置）<small>建好腾讯文档后，把链接发给 Claude 加进来</small>`; }
+}
+
+/* ---------- 出发前清单 ---------- */
+function renderPrep(){
+  const done = store.get("prep", {});
+  const custom = store.get("prepCustom", []);
+  let total = 0, ok = 0;
+  const groups = PREP.map((g, gi) => {
+    const lis = g[1].map((it, ii) => {
+      const id = gi + "-" + ii; total++; if (done[id]) ok++;
+      return `<li class="${done[id]?"done":""}"><input type="checkbox" data-id="${id}" ${done[id]?"checked":""}>
+        <span class="txt">${esc(it[0])}${it[1]?`<small>${esc(it[1])}</small>`:""}</span></li>`;
+    }).join("");
+    return `<div class="group-title">✿ ${esc(g[0])}</div><ul class="todo">${lis}</ul>`;
+  }).join("");
+  const cust = custom.map((c, i) => { total++; if (c.done) ok++;
+    return `<li class="${c.done?"done":""}"><input type="checkbox" data-c="${i}" ${c.done?"checked":""}><span class="txt">${esc(c.t)}</span><button class="del" data-c="${i}">×</button></li>`; }).join("");
+  const pct = total ? Math.round(ok / total * 100) : 0;
+  $("#prep").innerHTML = `<h3>${icon("suitcase")}出发前清单 <span class="tag">${ok} / ${total}</span></h3>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    <div class="hint">${pct === 100 ? "全部准备好了，一路顺风！" : "打勾的进度只存在这台手机，每个人各自对一遍"}</div>
+    <div class="remind" style="margin-top:10px"><b>明天：</b>${FLIGHTS[0].no} ${FLIGHTS[0].dep} 从深圳宝安 T3 起飞，${FLIGHTS[0].arr} 到新加坡。建议 ${FLIGHTS[0].go} 前到机场。</div>
+    ${groups}
+    <div class="group-title">✿ 我自己加的</div><ul class="todo">${cust || `<li class="empty" style="border:0">还没有</li>`}</ul>
+    <div class="addrow"><input id="prepIn" placeholder="还要带什么…" maxlength="60"><button id="prepAdd">添加</button></div>`;
+  $("#prep").querySelectorAll("input[data-id]").forEach(c => c.onchange = () => { done[c.dataset.id] = c.checked; store.set("prep", done); renderPrep(); });
+  $("#prep").querySelectorAll("input[data-c]").forEach(c => c.onchange = () => { custom[+c.dataset.c].done = c.checked; store.set("prepCustom", custom); renderPrep(); });
+  $("#prep").querySelectorAll(".del[data-c]").forEach(b => b.onclick = () => { custom.splice(+b.dataset.c, 1); store.set("prepCustom", custom); renderPrep(); });
+  const add = () => { const v = $("#prepIn").value.trim(); if (v){ custom.push({t:v, done:false}); store.set("prepCustom", custom); renderPrep(); } };
+  $("#prepAdd").onclick = add;
+  $("#prepIn").onkeydown = e => { if (e.key === "Enter") add(); };
+}
+
+/* ---------- 待办 ---------- */
+function renderTodo(){
+  const day = curDay();
+  let list = store.get("todo:" + day.date, null);
+  if (!list) list = (day.todos||[]).map(x => ({t:x, done:false}));
+  $("#todo").innerHTML = `<h3>${icon("check")}今日待办 <span class="tag">只存在这台手机</span></h3>
+    ${list.length ? "" : `<div class="empty">今天还没有待办</div>`}
+    <ul class="todo">${list.map((x,i) => `<li class="${x.done?"done":""}">
+      <input type="checkbox" data-i="${i}" ${x.done?"checked":""}><span class="txt">${esc(x.t)}</span>
+      <button class="del" data-i="${i}" aria-label="删除">×</button></li>`).join("")}</ul>
+    <div class="addrow"><input id="todoIn" placeholder="加一条待办…" maxlength="80"><button id="todoAdd">添加</button></div>`;
+  const save = l => { store.set("todo:" + day.date, l); renderTodo(); };
+  $("#todo").querySelectorAll("input[type=checkbox]").forEach(c => c.onchange = () => { list[+c.dataset.i].done = c.checked; save(list); });
+  $("#todo").querySelectorAll(".del").forEach(b => b.onclick = () => { list.splice(+b.dataset.i,1); save(list); });
+  const add = () => { const v = $("#todoIn").value.trim(); if (v){ list.push({t:v, done:false}); save(list); } };
+  $("#todoAdd").onclick = add;
+  $("#todoIn").onkeydown = e => { if (e.key === "Enter") add(); };
+}
+
+/* ---------- 地图 ---------- */
+let map = null, layer = null, leafletState = "loading", tileOk = 0;
+function loadLeaflet(){
+  return new Promise(res => {
+    const srcs = ["https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js","https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
+    const tryLoad = i => {
+      if (i >= srcs.length) return res(false);
+      const s = document.createElement("script"); s.src = srcs[i];
+      s.onload = () => res(!!window.L); s.onerror = () => tryLoad(i+1);
+      document.head.appendChild(s);
+    };
+    tryLoad(0);
+  });
+}
+function svgMap(el, day, city){
+  const pts = []; let n = 0;
+  day.items.forEach(p => { if (p.lat == null) return; n++; if (Math.abs(p.lat - city.lat) > 3) return; pts.push({n, p}); });
+  if (!pts.length){ el.innerHTML = `<div class="mapfail">今天没有可画的地点</div>`; return; }
+  const W = 340, H = 250, pad = 36, k = Math.cos(city.lat * Math.PI / 180);
+  const xs = pts.map(o => o.p.lon * k), ys = pts.map(o => -o.p.lat);
+  const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
+  const sc = Math.min((W - 2*pad) / Math.max(maxx - minx, 1e-6), (H - 2*pad) / Math.max(maxy - miny, 1e-6), 3000);
+  const ox = (W - (maxx - minx) * sc) / 2, oy = (H - (maxy - miny) * sc) / 2;
+  pts.forEach((o, i) => { o.x = ox + (xs[i] - minx) * sc; o.y = oy + (ys[i] - miny) * sc; });
+  const short = t => (t.replace(/^.*?[：:]/, "").split(/[（(·]/)[0].trim() || t).slice(0, 12);
+  const grid = [1,2,3,4].map(i => `<line x1="${i*W/5}" y1="0" x2="${i*W/5}" y2="${H}" stroke="#c9d3b8" stroke-width="1" stroke-dasharray="3 5"/>`).join("") +
+               [1,2,3].map(i => `<line x1="0" y1="${i*H/4}" x2="${W}" y2="${i*H/4}" stroke="#c9d3b8" stroke-width="1" stroke-dasharray="3 5"/>`).join("");
+  const line = pts.length > 1 ? `<polyline points="${pts.map(o => o.x.toFixed(1) + "," + o.y.toFixed(1)).join(" ")}" fill="none" stroke="#4f8571" stroke-width="2.5" stroke-dasharray="6 7" opacity=".85"/>` : "";
+  const placed = [];
+  const marks = pts.map(o => {
+    const left = o.x > W * 0.6; let ly = o.y + 4;
+    for (let t = 0; t < 14; t++){ if (placed.some(q => Math.abs(q.y - ly) < 12 && Math.abs(q.x - o.x) < 130)) ly += 12; else break; }
+    placed.push({x: o.x, y: ly});
+    return `<g><circle cx="${o.x.toFixed(1)}" cy="${o.y.toFixed(1)}" r="10" fill="${o.p.s === "fixed" ? "#4f8571" : "#c07e62"}" stroke="#2c3a33" stroke-width="2"/>
+      <text class="num" x="${o.x.toFixed(1)}" y="${(o.y + 5).toFixed(1)}" text-anchor="middle">${o.n}</text>
+      <text x="${(o.x + (left ? -15 : 15)).toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${left ? "end" : "start"}">${esc(short(o.p.n))}</text></g>`;
+  }).join("");
+  el.innerHTML = `<svg class="svgmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="今日地点示意图">${grid}${line}${marks}</svg>
+    <div class="mapnote">示意图，不按真实比例，北在上；要导航请点下面行程里的按钮</div>`;
+}
+function renderMap(){
+  const day = curDay();
+  if (day.type === "prep") return;
+  const el = $("#map");
+  if (leafletState === "loading"){ el.innerHTML = `<div class="mapfail">地图加载中…</div>`; return; }
+  const city = CITIES[day.city];
+  if (leafletState === "fail"){ svgMap(el, day, city); return; }
+  if (!map){
+    el.innerHTML = "";
+    map = L.map(el, {zoomControl:true, scrollWheelZoom:false});
+    const OSM = () => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, attribution:"© OpenStreetMap"});
+    const AMAP = () => L.tileLayer("https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}", {subdomains:"1234", maxZoom:18, attribution:"© 高德地图"});
+    let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch(e){}
+    const inChina = /^Asia\/(Shanghai|Chongqing|Harbin|Urumqi)$/.test(tz) || /^zh-CN/i.test(navigator.language || "");
+    const chain = (inChina ? [AMAP, OSM] : [OSM, AMAP]).slice();
+    let cur = null, errs = 0;
+    const useNext = () => {
+      if (cur) map.removeLayer(cur);
+      if (!chain.length) return;
+      cur = chain.shift()(); errs = 0;
+      cur.on("tileerror", () => { if (++errs === 6) useNext(); });
+      cur.on("tileload", () => tileOk++);
+      cur.addTo(map);
+    };
+    useNext();
+    setTimeout(() => { if (!tileOk && map){ map.remove(); map = null; layer = null; leafletState = "fail"; renderMap(); } }, 10000);
+    layer = L.layerGroup().addTo(map);
+  }
+  layer.clearLayers();
+  // 只画和当天城市在同一地区的点（跨城市的机场不连线）
+  const pts = []; let n = 0;
+  day.items.forEach(p => {
+    if (p.lat == null) return;
+    n++;
+    if (Math.abs(p.lat - city.lat) > 3) return;
+    const icn = L.divIcon({className:"", html:`<div class="pin ${p.s==="fixed"?"fixed":""}"><span>${n}</span></div>`, iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-26]});
+    L.marker([p.lat,p.lon], {icon:icn}).addTo(layer).bindPopup(`<b>${n}. ${esc(p.n)}</b><br>${esc(p.t)}`);
+    pts.push([p.lat,p.lon]);
+  });
+  if (pts.length > 1) L.polyline(pts, {color:"#4f8571", weight:3, dashArray:"6 8", opacity:.85}).addTo(layer);
+  setTimeout(() => {
+    map.invalidateSize();
+    if (pts.length > 1) map.fitBounds(pts, {padding:[30,30], maxZoom:15});
+    else if (pts.length === 1) map.setView(pts[0], 13);
+    else map.setView([city.lat, city.lon], 12);
+  }, 60);
+}
+
+/* ---------- 天气 ---------- */
+const WX = c => {
+  if (c === 0) return ["☀️","晴"]; if (c === 1) return ["🌤️","大致晴朗"]; if (c === 2) return ["⛅","多云"]; if (c === 3) return ["☁️","阴"];
+  if (c === 45 || c === 48) return ["🌫️","雾"]; if (c >= 51 && c <= 57) return ["🌦️","毛毛雨"];
+  if (c === 61) return ["🌧️","小雨"]; if (c === 63) return ["🌧️","中雨"]; if (c >= 65 && c <= 67) return ["🌧️","大雨"];
+  if (c >= 80 && c <= 82) return ["🌦️","阵雨"]; if (c >= 95) return ["⛈️","雷阵雨"]; return ["🌡️","—"];
+};
+const wxCache = {};
+function renderWeather(){
+  const day = curDay(), key = day.city, base = CITIES[key];
+  const city = Object.assign({}, base, day.wx || {});
+  const wkey = key + (day.wx ? ":" + day.wx.lat : "");
+  const box = $("#weather");
+  const head = t => `<h3>${icon("sun")}${city.name}${t} <span class="tag">当地 ${hmIn(city.tz)}</span></h3>`;
+  const draw = w => {
+    if (!w){ box.innerHTML = head("天气") + `<div class="empty">天气暂时获取不到，稍后刷新试试</div>`; return; }
+    const c = w.current, [ico, txt] = WX(c.weather_code), D = w.daily;
+    const di = D.time.indexOf(day.date), k = di >= 0 ? di : 0;
+    const label = di >= 0 ? day.date.slice(5).replace("-","/") : "今天";
+    const t = s => (s || "").slice(11,16);
+    const rain = D.precipitation_probability_max[k], uv = D.uv_index_max[k], tmax = D.temperature_2m_max[k];
+    const adv = [];
+    if (rain != null && rain >= 50) adv.push(`<span class="pill warn">☂ 带伞，降雨概率 ${rain}%</span>`);
+    if (uv != null && uv >= 8) adv.push(`<span class="pill warn">☀ 紫外线很强，记得防晒</span>`);
+    if (tmax != null && tmax >= 31) adv.push(`<span class="pill warn">穿轻薄透气，多补水</span>`);
+    let dayLine;
+    if (di >= 0){
+      const [i2, t2] = WX(D.weather_code[di]);
+      dayLine = `<div class="wx-day">${i2} ${label} 预报：${t2}，${Math.round(D.temperature_2m_min[di])}–${Math.round(tmax)}°C，降雨概率 ${rain ?? "—"}%</div>`;
+    } else dayLine = `<div class="hint" style="margin-top:8px">这天的预报出发前约两周才出来，现在显示的是${city.name}此刻的天气</div>`;
+    box.innerHTML = head("实时天气") + `
+      <div class="wx"><div class="ico">${ico}</div><div><div class="tmp">${Math.round(c.temperature_2m)}°</div>
+      <div class="desc">${txt} · 体感 ${Math.round(c.apparent_temperature)}° · 湿度 ${c.relative_humidity_2m}% · 风 ${Math.round(c.wind_speed_10m)} km/h</div></div></div>
+      ${dayLine}
+      <div class="wx-more"><span class="pill">${label} 日出 ${t(D.sunrise[k])}</span><span class="pill">日落 ${t(D.sunset[k])}</span><span class="pill">紫外线 ${uv != null ? Math.round(uv) : "—"}</span>${adv.join("")}</div>`;
+  };
+  if (wxCache[wkey] && Date.now() - wxCache[wkey].at < 15*60000){ draw(wxCache[wkey].data); return; }
+  box.innerHTML = head("天气") + `<div class="empty">加载中…</div>`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=16`;
+  fetchJSON(url).then(d => { wxCache[wkey] = {at:Date.now(), data:d}; if (curDay() === day) draw(d); })
+    .catch(() => { if (curDay() === day) draw(null); });
+}
+
+/* ---------- 新闻 ---------- */
+const newsCache = {};
+const ALERT = /flood|storm|warning|alert|fire|protest|haze|strike|closure|closed|delay|accident|evacuat|earthquake|dengue|outbreak|explosion|attack|shooting|typhoon|heavy rain|disrupt/i;
+function renderNews(){
+  const key = curDay().city, city = CITIES[key];
+  if (!city.news) return;
+  const box = $("#news");
+  const head = `<h3>${icon("news")}${city.name}新闻 · 紧急事件 <span class="tag">英文标题</span></h3>`;
+  const tail = `<div class="sos">${city.sos.map(s => `<a href="${s[1]}">${s[0]}</a>`).join("")}</div>
+    <div class="hint" style="margin:6px 0 4px">更多当地新闻（中文）：</div>
+    <div class="srcs">${city.srcs.map(s => `<a class="btn" href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a>`).join("")}</div>`;
+  const draw = arts => {
+    let body;
+    if (arts === null) body = `<div class="empty">新闻暂时加载不了，可以点下面的新闻网站看</div>`;
+    else if (!arts.length) body = `<div class="empty">最近两天没有抓到新闻</div>`;
+    else {
+      arts.sort((a,b) => (ALERT.test(b.title)?1:0) - (ALERT.test(a.title)?1:0));
+      body = `<ul class="news">${arts.slice(0,6).map(a => {
+        const s = a.seendate || "";
+        const when = s.length >= 13 ? `${s.slice(4,6)}/${s.slice(6,8)} ${s.slice(9,11)}:${s.slice(11,13)} UTC` : "";
+        return `<li>${ALERT.test(a.title)?'<span class="alert">注意</span>':""}<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>
+          <div class="meta">${esc(a.domain)} · ${when}</div></li>`;
+      }).join("")}</ul>`;
+    }
+    box.innerHTML = head + body + tail;
+  };
+  if (newsCache[key] && Date.now() - newsCache[key].at < 20*60000){ draw(newsCache[key].data); return; }
+  box.innerHTML = head + `<div class="empty">加载中…</div>` + tail;
+  const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(city.news)}&mode=artlist&maxrecords=15&timespan=2d&sort=datedesc&format=json`;
+  fetchJSON(url, 10000).then(d => {
+    const seen = new Set();
+    const arts = (d.articles || []).filter(a => { const k = (a.title||"").toLowerCase().slice(0,60); if (!a.title || seen.has(k)) return false; seen.add(k); return true; });
+    newsCache[key] = {at:Date.now(), data:arts};
+    if (curDay().city === key) draw(arts);
+  }).catch(() => { if (curDay().city === key) draw(null); });
+}
+
+/* ---------- 距离 ---------- */
+function km(a, b){
+  const R = 6371, r = x => x*Math.PI/180;
+  const dLat = r(b[0]-a[0]), dLon = r(b[1]-a[1]);
+  const h = Math.sin(dLat/2)**2 + Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+function dayCenter(){
+  const key = tabCity(), c = CITIES[key];
+  const ps = curDay().city === key ? curDay().items.filter(p => p.lat != null && Math.abs(p.lat - c.lat) < 0.5 && Math.abs(p.lon - c.lon) < 0.5) : [];
+  if (!ps.length) return [c.lat, c.lon];
+  return [ps.reduce((s,p)=>s+p.lat,0)/ps.length, ps.reduce((s,p)=>s+p.lon,0)/ps.length];
+}
+
+/* ---------- 觅食 ---------- */
+const CATS = [["all","全部"],["food","美食小吃"],["coffee","咖啡"],["drink","奶茶饮品"],["dessert","甜品"]];
+const CATNAME = {food:"美食", coffee:"咖啡", drink:"饮品", dessert:"甜品"};
+function renderFood(){
+  const key = tabCity(), city = CITIES[key];
+  const origin = state.myPos || dayCenter();
+  const list = FOOD[key].filter(f => state.foodCat === "all" || f.cat === state.foodCat)
+    .map(f => ({...f, dist: f.lat != null && !f.chain ? km(origin, [f.lat,f.lon]) : null}))
+    .sort((a,b) => (a.dist ?? 999) - (b.dist ?? 999));
+  const where = state.myPos ? "按你现在的位置由近到远排序" : curDay().type === "prep" ? "第一站新加坡，先看看吃什么" : "按今天行程区域由近到远排序";
+  $("#tab-food").innerHTML = `<div class="cityline">${icon("bowl")}${city.name} · 吃什么</div>
+    <div class="hint">${where}</div>
+    <div class="filters">${CATS.map(c => `<button class="fchip ${state.foodCat===c[0]?"on":""}" data-c="${c[0]}">${c[1]}</button>`).join("")}
+      <button class="fchip" id="locBtn">📍 ${state.myPos ? "已用我的位置" : "用我的位置"}</button></div>
+    <div class="card rough">${list.map(f => `<div class="place">
+      <div class="top2"><span class="cat ${f.cat}">${CATNAME[f.cat]}</span><span class="nm">${esc(f.n)}</span>
+      ${f.dist != null ? `<span class="dist">${f.dist < 1 ? Math.round(f.dist*1000)+" m" : f.dist.toFixed(1)+" km"}</span>` : (f.chain ? `<span class="dist" style="font-size:13px;font-family:var(--body)">连锁 · 找最近</span>` : "")}</div>
+      <div class="ds">${esc(f.d)}</div>
+      <div class="btns">${navBtns(f)}${xhsBtn(f.n, key)}</div></div>`).join("") || `<div class="empty">这一类还没有推荐</div>`}</div>`;
+  $("#tab-food").querySelectorAll(".fchip[data-c]").forEach(b => b.onclick = () => { state.foodCat = b.dataset.c; renderFood(); });
+  $("#locBtn").onclick = () => {
+    if (!navigator.geolocation){ alert("这台设备不支持定位"); return; }
+    $("#locBtn").textContent = "📍 定位中…";
+    navigator.geolocation.getCurrentPosition(p => { state.myPos = [p.coords.latitude, p.coords.longitude]; renderFood(); },
+      () => { alert("没拿到定位，请允许浏览器使用位置"); renderFood(); }, {timeout:10000});
+  };
+}
+
+/* ---------- 买买买 ---------- */
+function renderShop(){
+  const key = tabCity(), city = CITIES[key];
+  const got = store.get("shop:" + key, {});
+  $("#tab-shop").innerHTML = `<div class="cityline">${icon("bag")}${city.name} · 人气必买</div>
+    <div class="hint">买到了就打勾（只存在这台手机）</div>
+    <div class="card rough"><ul class="todo">${SHOP[key].map((s,i) => `<li class="${got[i]?"done":""}">
+      <input type="checkbox" data-i="${i}" ${got[i]?"checked":""}>
+      <div style="flex:1"><div class="txt"><b>${esc(s.n)}</b></div>
+      <div class="hint">${esc(s.d)}</div><div class="where">📍 ${esc(s.w)}</div>
+      <div class="btns">${xhsBtn(s.n, key)}</div></div></li>`).join("")}</ul></div>`;
+  $("#tab-shop").querySelectorAll("input[type=checkbox]").forEach(c => c.onchange = () => { got[c.dataset.i] = c.checked; store.set("shop:" + key, got); renderShop(); });
+}
+
+/* ---------- 汇率 ---------- */
+let fxRates = null, fxState = "idle";
+function loadFx(){
+  if (fxState !== "idle") return;
+  fxState = "loading";
+  fetchJSON("https://open.er-api.com/v6/latest/CNY", 9000)
+    .then(d => { if (d && d.rates){ fxRates = d.rates; fxState = "ok"; } else fxState = "fail"; })
+    .catch(() => { fxState = "fail"; })
+    .then(() => { if (state.tab === "tips" || state.tab === "wallet") renderTab(); });
+}
+const toCNY = (amt, cur) => fxRates && fxRates[cur] ? amt / fxRates[cur] : null;
+
+/* ---------- 锦囊 ---------- */
+function renderTips(){
+  const key = tabCity(), city = CITIES[key], T = TIPS[key];
+  loadFx();
+  const tag = fxState === "ok" ? "实时汇率" : fxState === "fail" ? "" : "加载中…";
+  const fxCard = `<div class="card rough"><h3>${icon("coin")}汇率换算 <span class="tag">${tag}</span></h3>
+    ${fxState==="fail" ? `<div class="empty">汇率暂时获取不到，稍后再试</div>` : `
+    <div class="fx"><input id="fxIn" type="number" inputmode="decimal" value="${store.get("fx:"+key,100)}">
+      <span class="eq">=</span>
+      <select id="fxFrom"><option value="${T.cur}">${T.curName} ${T.cur}</option><option value="CNY">人民币 CNY</option><option value="USD">美元 USD</option></select></div>
+    <div class="fxout" id="fxOut"></div>`}</div>`;
+  const secs = T.sections.map(s => `<div class="card rough"><h3>${icon(s[0])}${s[1]}</h3><ul class="tips">${s[2].map(x => `<li>${x}</li>`).join("")}</ul></div>`).join("");
+  const phr = `<div class="card rough"><h3>${icon("chat")}${T.phrases.title}</h3><div class="phr">${T.phrases.rows.map(r => `<span class="zh">${r[0]}</span><span class="say">${r[1]}</span>`).join("")}</div></div>`;
+  const sos = `<div class="card rough"><h3>${icon("phone")}紧急电话</h3><div class="sos" style="margin:0">${city.sos.map(s => `<a href="${s[1]}">${s[0]}</a>`).join("")}</div></div>`;
+  $("#tab-tips").innerHTML = `<div class="cityline">${icon("compass")}${city.name} · 旅行锦囊</div><div class="hint">跟着当天所在城市自动切换</div>` + fxCard + secs + phr + sos;
+  const calc = () => {
+    const out = $("#fxOut"); if (!out) return;
+    const amt = parseFloat($("#fxIn").value) || 0, from = $("#fxFrom").value;
+    store.set("fx:"+key, amt);
+    if (!fxRates){ out.innerHTML = ""; return; }
+    const inCNY = amt / fxRates[from];
+    out.innerHTML = [[T.cur, T.curName],["CNY","人民币"],["USD","美元"]].filter(c => c[0] !== from).map(c => {
+      const v = inCNY * fxRates[c[0]];
+      return `<div><b>${v >= 100 ? Math.round(v).toLocaleString() : v.toFixed(2)}</b><small>${c[1]} ${c[0]}</small></div>`;
+    }).join("");
+  };
+  if ($("#fxIn")){ $("#fxIn").oninput = calc; $("#fxFrom").onchange = calc; calc(); }
+}
+
+/* ---------- 根据机酒整理的提醒 ---------- */
+function tripTipsCard(){
+  const L = [
+    ["11/22 出发（ZH229 13:05）", "建议 10:00 前到宝安机场 T3；新加坡和北京没有时差，17:15 落地后不在机场逗留，直接 Grab 去酒店（约 25–30 分钟），晚上就在酒店旁：20:00 乘 Bumboat 游新加坡河，再去隔壁的 Jumbo 吃螃蟹。"],
+    ["新加坡 4 晚（琵拉帝诗）", "入住时一般要信用卡做押金；11/26 退房后直接去樟宜 Jewel 逛，13:00 起在 Jewel 的早到值机柜台办酷航值机、寄行李。"],
+    ["11/26 转场（TR610 16:00）", "酷航是廉航：手提和托运额度、餐食都以订单为准，超重在机场加价很贵；可在 Jewel 早到值机（起飞前 3 小时起）；曼谷比新加坡慢 1 小时，17:35 落地，约 20:30 才能到酒店，当晚只安排轻松的夜宵。"],
+    ["曼谷 5 晚 4 个住处", "河畔安凡尼 1 晚 → 安帕瓦 1 晚 → 大城 1 晚 → 暹罗诺富特 2 晚。11/27–11/29 建议包车，大行李留车上，随身小包装两晚东西。"],
+    ["住得远的两晚", "安帕瓦（家庭旅馆）和大城都比较偏，当地晚饭和夜里交通有限；大城酒店前台 9:00–18:00，晚到要提前联系；现金备够。"],
+    ["12/01 回程（CZ8324 19:15）", "诺富特中午退房，行李寄存前台；16:00 出发去素万那普；有退税单要先办退税再值机。22:55 落地深圳已很晚，先约好车。"],
+    ["证件和入境", "新加坡 SG Arrival Card、泰国 TDAC 都要在入境前 3 天内提交；两地目前对中国护照互免签证，出发前再看一次最新政策。"]
+  ];
+  return `<div class="card rough"><h3>${icon("bulb")}根据机酒整理的提醒</h3><ul class="tips">${L.map(x => `<li><b>${x[0]}</b>：${x[1]}</li>`).join("")}</ul></div>`;
+}
+
+/* ---------- 钱包：票夹 + 记账 ---------- */
+function showDriver(i){
+  const h = HOTELS[i];
+  $("#overlayBox").innerHTML = `<div class="lbl">请带我去这里 · Please take me here</div>
+    <div class="big">${esc(h.en || h.name)}</div><div class="addr">${esc(h.local || h.addr)}</div>
+    ${h.local && h.addr ? `<div class="hint" style="margin-top:10px">${esc(h.addr)}</div>` : ""}
+    <div class="hint" style="margin-top:10px">${esc(h.name)}｜司机看不懂就点 Google 地图导航</div>`;
+  $("#overlay").classList.add("show");
+}
+function settle(bal){
+  const cred = [], debt = [];
+  Object.entries(bal).forEach(([p,v]) => { if (v > 0.5) cred.push([p,v]); else if (v < -0.5) debt.push([p,-v]); });
+  const out = [];
+  let i = 0, j = 0;
+  while (i < debt.length && j < cred.length){
+    const x = Math.min(debt[i][1], cred[j][1]);
+    out.push(`${esc(debt[i][0])} → ${esc(cred[j][0])}：<b>¥${Math.round(x)}</b>`);
+    debt[i][1] -= x; cred[j][1] -= x;
+    if (debt[i][1] < 0.5) i++;
+    if (cred[j][1] < 0.5) j++;
+  }
+  return out;
+}
+function renderWallet(){
+  loadFx();
+  const key = tabCity(), T = TIPS[key];
+  const people = store.get("people", ["我","同伴1","同伴2"]);
+  const book = store.get("book", []);
+
+  const tickets = FLIGHTS.map(ticketHTML).join("");
+  const hotels = HOTELS.map((h,i) => `<div class="hotel">
+      <div><b>${esc(h.place || CITIES[h.city].name)} · ${esc(h.name)}</b></div>
+      <div class="hint">${esc(h.dates)} ｜ ${esc(h.room)}</div>
+      <div class="hint">${esc(h.addr)}</div>
+      <div class="btns"><button class="btn solid" data-drv="${i}">给司机看地址</button>
+      <a class="btn g" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.en + " " + h.addr)}" target="_blank" rel="noopener">导航到酒店</a></div></div>`).join("");
+
+  // 记账汇总
+  let totalCNY = 0, missing = false;
+  const paid = {}; people.forEach(p => paid[p] = 0);
+  book.forEach(e => { const v = toCNY(e.amt, e.cur); if (v == null) { missing = true; return; } totalCNY += v; if (paid[e.payer] != null) paid[e.payer] += v; });
+  const share = people.length ? totalCNY / people.length : 0;
+  const bal = {}; people.forEach(p => bal[p] = paid[p] - share);
+  const plan = settle(bal);
+  const CATS2 = ["餐饮","交通","门票","购物","住宿","其他"];
+
+  $("#tab-wallet").innerHTML = `<div class="cityline">${icon("wallet")}钱包 · 票夹和账本</div>
+    <div class="hint">航班信息也会显示在当天的行程里</div>
+    <div class="card rough"><h3>${icon("plane")}航班</h3>${tickets}</div>
+    <div class="card rough"><h3>${icon("bed")}酒店</h3>${hotels}
+      <div class="hint" style="margin-top:6px">泰文地址请入住前对照订单核实一次；订单号和住客姓名没有放在网页里，请去订单 App 查看</div></div>
+    ${tripTipsCard()}
+    <div class="card rough"><h3>${icon("receipt")}旅行账本 · AA <span class="tag">只存在这台手机</span></h3>
+      <div class="hint">建议由一个人负责记账，最后按结算建议转账</div>
+      <div class="sumgrid"><div><b>¥${Math.round(totalCNY).toLocaleString()}</b><small>总花费（折合人民币）</small></div>
+        <div><b>¥${Math.round(share).toLocaleString()}</b><small>人均 · ${people.length} 人</small></div></div>
+      ${missing ? `<div class="hint">汇率还没加载好，部分外币暂未计入</div>` : ""}
+      ${plan.length ? `<div class="group-title">结算建议</div>${plan.map(x => `<div class="settle">${x}</div>`).join("")}` : ""}
+      <div class="group-title">记一笔</div>
+      <div class="form">
+        <input id="bkDesc" class="full" placeholder="买了什么，比如：辣椒螃蟹" maxlength="40">
+        <input id="bkAmt" type="number" inputmode="decimal" placeholder="金额">
+        <select id="bkCur"><option value="${T.cur}">${T.curName}</option>${["SGD","THB","CNY","USD"].filter(c=>c!==T.cur).map(c=>`<option value="${c}">${{SGD:"新币",THB:"泰铢",CNY:"人民币",USD:"美元"}[c]}</option>`).join("")}</select>
+        <select id="bkPayer">${people.map(p => `<option>${esc(p)}</option>`).join("")}</select>
+        <select id="bkCat">${CATS2.map(c => `<option>${c}</option>`).join("")}</select>
+        <button id="bkAdd" class="full">记下来</button>
+      </div>
+      <ul class="ledger">${book.slice().reverse().map(e => `<li>
+        <div><div>${esc(e.desc || e.cat)}</div><small>${esc(e.day)} · ${esc(e.cat)} · ${esc(e.payer)} 付</small></div>
+        <span class="amt">${e.amt.toLocaleString()} ${esc(e.cur)}</span><button class="del" data-id="${e.id}">×</button></li>`).join("") || `<li class="empty" style="border:0">还没有记录</li>`}</ul>
+      <div class="group-title">同行成员</div>
+      <div class="addrow"><input id="ppl" value="${esc(people.join("，"))}" placeholder="用逗号分隔名字"><button id="pplSave">保存</button></div>
+    </div>`;
+
+  $("#tab-wallet").querySelectorAll("[data-drv]").forEach(b => b.onclick = () => showDriver(+b.dataset.drv));
+  $("#bkAdd").onclick = () => {
+    const amt = parseFloat($("#bkAmt").value);
+    if (!amt || amt <= 0){ $("#bkAmt").focus(); return; }
+    const d = dayObj(curDay().date);
+    book.push({id:Date.now(), desc:$("#bkDesc").value.trim(), amt, cur:$("#bkCur").value, payer:$("#bkPayer").value, cat:$("#bkCat").value, day:`${d.getUTCMonth()+1}/${d.getUTCDate()}`});
+    store.set("book", book); renderWallet();
+  };
+  $("#tab-wallet").querySelectorAll(".ledger .del").forEach(b => b.onclick = () => {
+    if (!confirm("删除这一笔？")) return;
+    store.set("book", book.filter(e => String(e.id) !== b.dataset.id)); renderWallet();
+  });
+  $("#pplSave").onclick = () => {
+    const list = $("#ppl").value.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
+    if (list.length){ store.set("people", list); renderWallet(); }
+  };
+}
+
+/* ---------- Tab ---------- */
+const TABS = [
+  ["home","今日",'<circle cx="16" cy="16" r="5.5"/><path d="M16 4v3M16 25v3M4 16h3M25 16h3M7.5 7.5l2.1 2.1M22.4 22.4l2.1 2.1M7.5 24.5l2.1-2.1M22.4 9.6l2.1-2.1"/>'],
+  ["food","觅食",'<path d="M5 15h22c0 6.5-4.9 11-11 11S5 21.5 5 15z"/><path d="M11 11c0-2 2-2 2-4M16 11c0-2 2-2 2-4M21 11c0-2 2-2 2-4"/>'],
+  ["shop","买买买",'<path d="M6 11h20l-1.6 15H7.6z"/><path d="M11.5 14V9.5a4.5 4.5 0 0 1 9 0V14"/>'],
+  ["tips","锦囊",'<path d="M10 9h12l3 5v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V14z"/><path d="M13 9V6h6v3"/><path d="M12.5 19.5c2 1.6 5 1.6 7 0"/>'],
+  ["wallet","钱包",'<path d="M5 10h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a1 1 0 0 1-1-1z"/><path d="M5 10l15-4v4"/><path d="M21 18h6"/>']
+];
+function renderTabbar(){
+  $("#tabbar").innerHTML = TABS.map(t => `<button class="tb rough ${state.tab===t[0]?"on":""}" data-tab="${t[0]}">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="filter:url(#rough)">${t[2]}</svg>${t[1]}</button>`).join("");
+  $("#tabbar").querySelectorAll(".tb").forEach(b => b.onclick = () => {
+    state.tab = b.dataset.tab;
+    renderTabbar();
+    document.querySelectorAll(".tab").forEach(s => s.classList.toggle("active", s.id === "tab-" + state.tab));
+    renderTab();
+    if (state.tab === "home" && map) setTimeout(() => map.invalidateSize(), 60);
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+}
+function renderTab(){
+  if (state.tab === "food") renderFood();
+  if (state.tab === "shop") renderShop();
+  if (state.tab === "tips") renderTips();
+  if (state.tab === "wallet") renderWallet();
+}
+
+/* ---------- 启动 ---------- */
+(function init(){
+  fillIcons();
+  const today = ymdIn("Asia/Shanghai");
+  const ti = DAYS.findIndex(d => d.date === today);
+  state.idx = ti >= 0 ? ti : 0;
+  renderTabbar(); renderDays(); renderClocks(); renderHome();
+  setInterval(renderClocks, 20000);
+  loadLeaflet().then(ok => { leafletState = ok ? "ok" : "fail"; renderMap(); });
+})();
+</script>
+</body>
+</html>
